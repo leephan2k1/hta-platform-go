@@ -1,0 +1,58 @@
+# --- Binaries and Executables ---
+# Generic Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Project specific binaries (from Makefile)
+server-cli
+server-cli-*
+
+# --- Environment and Secrets (Security) ---
+# Ignore all environment configuration files
+.env
+.env.*
+.env_dev
+# Explicitly ignore seen dev env
+ 
+# --- Go Specific ---
+# Test binaries and coverage reports
+*.test
+*.out
+coverage.txt
+
+# Dependency directories 
+# (Uncomment if you don't want to track the vendor folder)
+# vendor/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# --- IDE and Editor Specific ---
+# JetBrains (GoLand, IntelliJ)
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Vim/Emacs/Temporary files
+*~
+*.swp
+*.swo
+.DS_Store
+
+# --- System Files ---
+Thumbs.db
+desktop.ini
+tmp
