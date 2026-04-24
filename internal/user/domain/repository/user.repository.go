@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/leedev/go-rest-ddd/internal/user/domain/model/entity"
+	"hta-platform/internal/user/domain/model/entity"
 )
 
 type UserRepository interface {

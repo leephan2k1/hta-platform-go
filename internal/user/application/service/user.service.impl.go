@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/leedev/go-rest-ddd/internal/user/domain/model/entity"
-	userRepo "github.com/leedev/go-rest-ddd/internal/user/domain/repository"
+	"hta-platform/internal/user/domain/model/entity"
+	userRepo "hta-platform/internal/user/domain/repository"
 )
 
 type userService struct {

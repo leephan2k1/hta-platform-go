@@ -1,8 +1,9 @@
 package main
 
 import (
-	_ "github.com/leedev/go-rest-ddd/cmd/swag/docs"
-	"github.com/leedev/go-rest-ddd/internal/initialize"
+	_ "hta-platform/cmd/swag/docs"
+	"hta-platform/internal/initialize"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )

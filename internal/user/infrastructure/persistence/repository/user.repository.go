@@ -4,8 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/leedev/go-rest-ddd/internal/user/domain/model/entity"
-	"github.com/leedev/go-rest-ddd/internal/user/domain/repository"
+	"hta-platform/internal/user/domain/model/entity"
+	"hta-platform/internal/user/domain/repository"
+
 	"gorm.io/gorm"
 )
 

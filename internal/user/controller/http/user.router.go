@@ -1,8 +1,9 @@
 package http
 
 import (
+	"hta-platform/pkg/response"
+
 	"github.com/gin-gonic/gin"
-	"github.com/leedev/go-rest-ddd/pkg/response"
 )
 
 func RegisterUserRoutes(rg *gin.RouterGroup, handler *UserHandler) {

@@ -3,7 +3,8 @@ package initialize
 import (
 	"os"
 
-	"github.com/leedev/go-rest-ddd/global"
+	"hta-platform/global"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

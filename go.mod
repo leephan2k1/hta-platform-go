@@ -1,4 +1,4 @@
-module github.com/leedev/go-rest-ddd
+module hta-platform
 
 go 1.26.2
 
