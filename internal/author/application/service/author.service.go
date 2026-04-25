@@ -7,7 +7,7 @@ import (
 )
 
 type AuthorService interface {
-	CreateAuthor(ctx context.Context, req *dto.AuthorReq) error
+	CreateAuthor(ctx context.Context, req *dto.AuthorReq) (entity.Author, error)
 
 	GetAuthorByUrl(ctx context.Context, url string) (*entity.Author, error)
 }

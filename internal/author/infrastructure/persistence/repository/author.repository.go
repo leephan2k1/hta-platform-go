@@ -6,6 +6,7 @@ import (
 	"hta-platform/internal/author/domain/repository"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type authorRepository struct {
@@ -13,13 +14,26 @@ type authorRepository struct {
 }
 
 // CreateAuthor implements [repository.AuthorRepository].
-func (a *authorRepository) CreateAuthor(ctx context.Context, author *entity.Author) error {
-	panic("unimplemented")
+func (a *authorRepository) CreateAuthor(ctx context.Context, author *entity.Author) (entity.Author, error) {
+	result := a.DB.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "author_url"}},
+		DoUpdates: clause.AssignmentColumns([]string{"author_url", "name", "updated_at"}),
+	}).Create(author)
+
+	if result.Error != nil {
+		return entity.Author{}, result.Error
+	}
+	return *author, nil
 }
 
 // FindAuthorByUrl implements [repository.AuthorRepository].
 func (a *authorRepository) FindAuthorByUrl(ctx context.Context, authorURL string) (*entity.Author, error) {
-	panic("unimplemented")
+	var author entity.Author
+	result := a.DB.Where("author_url = ?", authorURL).First(&author)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &author, nil
 }
 
 func NewAuthorRepository(db *gorm.DB) repository.AuthorRepository {

@@ -7,7 +7,7 @@ import (
 )
 
 type AuthorRepository interface {
-	CreateAuthor(ctx context.Context, author *authorEntity.Author) error
+	CreateAuthor(ctx context.Context, author *authorEntity.Author) (authorEntity.Author, error)
 
 	FindAuthorByUrl(ctx context.Context, authorURL string) (*authorEntity.Author, error)
 }
