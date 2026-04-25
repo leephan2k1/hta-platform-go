@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterAuthorRoutes(rg *gin.RouterGroup, handler *AuthorHandler) {
-	a := rg.Group("/author")
+	a := rg.Group("/authors")
 
 	a.POST("/", response.Wrap(handler.CreateAuthor))
 

@@ -2,7 +2,7 @@ package domain
 
 import (
 	authorEntity "hta-platform/internal/author/domain/model/entity"
-	categoryDomain "hta-platform/internal/category/domain"
+	categoryEntity "hta-platform/internal/category/domain/model/enity"
 	"hta-platform/pkg/base"
 
 	"github.com/google/uuid"
@@ -18,7 +18,7 @@ type Media struct {
 	IsNSFW      bool                      `gorm:"column:is_nsfw;default:false" json:"is_nsfw"`
 	Thumbnail   string                    `gorm:"column:thumbnail" json:"thumbnail"`
 	Source      string                    `gorm:"column:source" json:"source"`
-	Categories  []categoryDomain.Category `gorm:"many2many:hta.media_to_category;foreignKey:ID;joinForeignKey:MediaID;References:ID;joinReferences:CategoryID" json:"categories,omitempty"`
+	Categories  []categoryEntity.Category `gorm:"many2many:hta.media_to_category;foreignKey:ID;joinForeignKey:MediaID;References:ID;joinReferences:CategoryID" json:"categories,omitempty"`
 	Authors     []authorEntity.Author     `gorm:"many2many:hta.media_to_author;foreignKey:ID;joinForeignKey:MediaID;References:ID;joinReferences:AuthorID" json:"authors,omitempty"`
 }
 

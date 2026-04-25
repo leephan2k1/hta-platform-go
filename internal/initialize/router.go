@@ -1,8 +1,10 @@
 package initialize
 
 import (
-	"hta-platform/internal/author/controller/http"
-	initialize "hta-platform/internal/initialize/author"
+	authorHttp "hta-platform/internal/author/controller/http"
+	categoryHttp "hta-platform/internal/category/controller/http"
+	initializeAuthor "hta-platform/internal/initialize/author"
+	initializeCategory "hta-platform/internal/initialize/category"
 	"hta-platform/internal/middleware"
 	"hta-platform/pkg/response"
 
@@ -48,8 +50,11 @@ func InitRouter(db *gorm.DB, isLogger string) *gin.Engine {
 
 	// Register the auth routes
 	// === DI các handler
-	authHandler := initialize.InitAuthor(db)
-	http.RegisterAuthorRoutes(v1, authHandler)
+	authorHandler := initializeAuthor.InitAuthor(db)
+	authorHttp.RegisterAuthorRoutes(v1, authorHandler)
+
+	categoryHandler := initializeCategory.InitCategory(db)
+	categoryHttp.RegisterCategoryRoutes(v1, categoryHandler)
 
 	return r
 }

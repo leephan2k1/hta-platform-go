@@ -1,4 +1,4 @@
-package domain
+package enity
 
 import (
 	"hta-platform/pkg/base"
