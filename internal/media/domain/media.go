@@ -1,6 +1,7 @@
 package domain
 
 import (
+	authorDomain "hta-platform/internal/author/domain"
 	categoryDomain "hta-platform/internal/category/domain"
 	"hta-platform/pkg/base"
 
@@ -18,6 +19,7 @@ type Media struct {
 	Thumbnail   string                    `gorm:"column:thumbnail" json:"thumbnail"`
 	Source      string                    `gorm:"column:source" json:"source"`
 	Categories  []categoryDomain.Category `gorm:"many2many:hta.media_to_category;foreignKey:ID;joinForeignKey:MediaID;References:ID;joinReferences:CategoryID" json:"categories,omitempty"`
+	Authors     []authorDomain.Author     `gorm:"many2many:hta.media_to_author;foreignKey:ID;joinForeignKey:MediaID;References:ID;joinReferences:AuthorID" json:"authors,omitempty"`
 }
 
 func (Media) TableName() string {
