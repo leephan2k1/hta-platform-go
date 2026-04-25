@@ -47,5 +47,12 @@ func (a *AuthorHandler) CreateAuthor(c *gin.Context) (res interface{}, err error
 }
 
 func (a *AuthorHandler) GetAuthorByUrl(c *gin.Context) (res interface{}, err error) {
-	return nil, nil
+	url := c.Param("url")
+	author, err := a.authorService.GetAuthorByUrl(c, url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return author, nil
 }
