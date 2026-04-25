@@ -39,11 +39,6 @@ go.work.sum
 *.ipr
 
 # Visual Studio Code
-.vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 *.code-workspace
 
 # Vim/Emacs/Temporary files
