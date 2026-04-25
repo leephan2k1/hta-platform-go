@@ -17,13 +17,13 @@ func Run() (*gin.Engine, string) {
 	}
 
 	// 3> Initialize database connection
-	_, err = InitDB(&config)
+	db, err := InitDB(&config)
 	if err != nil {
 		logger.Fatal("Could not initialize database: %v", zap.Error(err))
 	}
 
 	// 4> Initialize router
-	r := InitRouter(config.LogLevel)
+	r := InitRouter(db, config.LogLevel)
 
 	// 5> Initialize other services if needed (e.g., cache, message queue, etc.)
 	return r, config.ServerPort
