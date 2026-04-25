@@ -8,12 +8,13 @@ import (
 
 type MediaChapter struct {
 	base.CommonModel
-	Name     string    `gorm:"column:name;unique;not null" json:"name"`
-	URL      string    `gorm:"column:url;unique" json:"url"`
-	Language string    `gorm:"column:language" json:"language"`
-	Order    int64     `gorm:"column:order" json:"order"`
-	MediaID  uuid.UUID `gorm:"column:media_id;type:uuid;not null" json:"media_id"`
-	Source   string    `gorm:"column:source" json:"source"`
+	Name     string         `gorm:"column:name;unique;not null" json:"name"`
+	URL      string         `gorm:"column:url;unique" json:"url"`
+	Language string         `gorm:"column:language" json:"language"`
+	Order    int64          `gorm:"column:order" json:"order"`
+	MediaID  uuid.UUID      `gorm:"column:media_id;type:uuid;not null" json:"media_id"`
+	Source   string         `gorm:"column:source" json:"source"`
+	Images   []ChapterImage `gorm:"foreignKey:ChapterID;references:ID" json:"images,omitempty"`
 }
 
 func (MediaChapter) TableName() string {
