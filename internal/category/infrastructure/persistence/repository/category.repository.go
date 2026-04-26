@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"hta-platform/internal/category/domain/model/enity"
+	"hta-platform/internal/category/domain/model/entity"
 	"hta-platform/internal/category/domain/repository"
 
 	"gorm.io/gorm"
@@ -14,21 +14,21 @@ type categoryRepository struct {
 }
 
 // CreateCategory implements [repository.CategoryRepository].
-func (c *categoryRepository) CreateCategory(ctx context.Context, category *enity.Category) (enity.Category, error) {
+func (c *categoryRepository) CreateCategory(ctx context.Context, category *entity.Category) (entity.Category, error) {
 	result := c.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "slug"}},
 		DoUpdates: clause.AssignmentColumns([]string{"name", "slug", "updated_at"}),
 	}).Create(category)
 
 	if result.Error != nil {
-		return enity.Category{}, result.Error
+		return entity.Category{}, result.Error
 	}
 	return *category, nil
 }
 
 // FindAllCategories implements [repository.CategoryRepository].
-func (c *categoryRepository) FindAllCategories(ctx context.Context) ([]enity.Category, error) {
-	var categories []enity.Category
+func (c *categoryRepository) FindAllCategories(ctx context.Context) ([]entity.Category, error) {
+	var categories []entity.Category
 	result := c.DB.Select("id", "name", "slug").Find(&categories)
 	if result.Error != nil {
 		return nil, result.Error

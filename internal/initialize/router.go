@@ -3,8 +3,10 @@ package initialize
 import (
 	authorHttp "hta-platform/internal/author/controller/http"
 	categoryHttp "hta-platform/internal/category/controller/http"
+	mediaHttp "hta-platform/internal/media/controller/http"
 	initializeAuthor "hta-platform/internal/initialize/author"
 	initializeCategory "hta-platform/internal/initialize/category"
+	initializeMedia "hta-platform/internal/initialize/media"
 	"hta-platform/internal/middleware"
 	"hta-platform/pkg/response"
 
@@ -55,6 +57,9 @@ func InitRouter(db *gorm.DB, isLogger string) *gin.Engine {
 
 	categoryHandler := initializeCategory.InitCategory(db)
 	categoryHttp.RegisterCategoryRoutes(v1, categoryHandler)
+
+	mediaHandler := initializeMedia.InitMedia(db)
+	mediaHttp.RegisterMediaRoutes(v1, mediaHandler)
 
 	return r
 }

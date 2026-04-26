@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"hta-platform/internal/category/controller/dto"
-	"hta-platform/internal/category/domain/model/enity"
+	"hta-platform/internal/category/domain/model/entity"
 	"hta-platform/internal/category/domain/repository"
 
 	"github.com/gosimple/slug"
@@ -18,8 +18,8 @@ func NewCategoryService(categoryRepo repository.CategoryRepository) CategoryServ
 }
 
 // CreateCategory implements [CategoryService].
-func (s *categoryService) CreateCategory(ctx context.Context, req *dto.CategoryReq) (enity.Category, error) {
-	category := enity.Category{
+func (s *categoryService) CreateCategory(ctx context.Context, req *dto.CategoryReq) (entity.Category, error) {
+	category := entity.Category{
 		Name: req.Name,
 		Slug: slug.Make(req.Name),
 	}
@@ -27,6 +27,6 @@ func (s *categoryService) CreateCategory(ctx context.Context, req *dto.CategoryR
 }
 
 // GetAllCategories implements [CategoryService].
-func (s *categoryService) GetAllCategories(ctx context.Context) ([]enity.Category, error) {
+func (s *categoryService) GetAllCategories(ctx context.Context) ([]entity.Category, error) {
 	return s.categoryRepo.FindAllCategories(ctx)
 }

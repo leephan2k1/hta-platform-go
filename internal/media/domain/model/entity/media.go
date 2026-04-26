@@ -1,8 +1,8 @@
-package domain
+package entity
 
 import (
 	authorEntity "hta-platform/internal/author/domain/model/entity"
-	categoryEntity "hta-platform/internal/category/domain/model/enity"
+	categoryEntity "hta-platform/internal/category/domain/model/entity"
 	"hta-platform/pkg/base"
 
 	"github.com/google/uuid"
