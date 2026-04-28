@@ -4,6 +4,23 @@ import (
 	"hta-platform/internal/media/domain/model/entity"
 )
 
+type Image struct {
+	Url         string `json:"url" binding:"required" validate:"required" dc:"URL ảnh"`
+	Description string `json:"description" binding:"omitempty" validate:"omitempty" dc:"Mô tả ảnh"`
+	Source      string `json:"source" binding:"omitempty" validate:"omitempty" dc:"Nguồn ảnh"`
+}
+
+type ChapterImageReq struct {
+	Order  int64   `json:"order" binding:"required" validate:"required" dc:"Thứ tự chapter"`
+	Images []Image `json:"images" binding:"required" validate:"required" dc:"Danh sách ảnh"`
+}
+
+type CreateChapterImageReq struct {
+	MediaUrl      string            `json:"media_url" binding:"required" validate:"required" dc:"Media URL"`
+	ChapterOrder  int64             `json:"chapter_order" binding:"required" validate:"required" dc:"Thứ tự chapter"`
+	ChapterImages []ChapterImageReq `json:"chapter_images" binding:"required" validate:"required" dc:"Danh sách ảnh"`
+}
+
 type CreateMediaChapterReq struct {
 	MediaUrl string             `json:"media_url" binding:"required" validate:"required" dc:"Media URL"`
 	Chapters []CreateChapterReq `json:"chapters" binding:"required" validate:"required" dc:"Danh sách chapter"`

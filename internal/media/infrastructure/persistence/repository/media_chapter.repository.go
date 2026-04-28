@@ -13,6 +13,35 @@ type mediaChapterRepository struct {
 	db *gorm.DB
 }
 
+// FindChapterByMediaUrlAndOrder implements [repository.MediaChapterRepository].
+func (m *mediaChapterRepository) FindChapterByMediaUrlAndOrder(ctx context.Context, mediaUrl string, order int64) (*entity.MediaChapter, error) {
+	var chapter entity.MediaChapter
+	err := m.db.WithContext(ctx).
+		Joins("JOIN hta.media m ON m.id = hta.media_chapter.media_id").
+		Where("m.url = ? AND hta.media_chapter.order = ?", mediaUrl, order).
+		First(&chapter).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &chapter, nil
+}
+
+// CreateChapterImages implements [repository.MediaChapterRepository].
+func (m *mediaChapterRepository) CreateChapterImages(ctx context.Context, images []*entity.ChapterImage) ([]entity.ChapterImage, error) {
+	err := m.db.WithContext(ctx).Create(&images).Error
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]entity.ChapterImage, len(images))
+	for i, img := range images {
+		res[i] = *img
+	}
+	return res, nil
+}
+
 // CreateMediaChapters implements [repository.MediaChapterRepository].
 func (m *mediaChapterRepository) CreateMediaChapters(ctx context.Context, chapters []*entity.MediaChapter) ([]entity.MediaChapter, error) {
 	err := m.db.WithContext(ctx).

@@ -27,6 +27,26 @@ func (h *MediaChapterHandler) GetChapterImagesByChapterUrl(c *gin.Context) (inte
 	return h.service.GetChapterImagesByChapterUrl(c, url)
 }
 
+func (h *MediaChapterHandler) CreateChapterImages(c *gin.Context) (interface{}, error) {
+	var req dto.CreateChapterImageReq
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		return nil, err
+	}
+
+	validation, exists := c.Get("validation")
+	if !exists {
+		return nil, response.NewAPIError(http.StatusInternalServerError, "Invalid request", "Validation not found in context")
+	}
+
+	apiErr := utils.ValidateStruct(&req, validation.(*validator.Validate))
+	if apiErr != nil {
+		return nil, apiErr
+	}
+
+	return h.service.CreateChapterImages(c, &req)
+}
+
 func (h *MediaChapterHandler) CreateMediaChapters(c *gin.Context) (interface{}, error) {
 	var req dto.CreateMediaChapterReq
 

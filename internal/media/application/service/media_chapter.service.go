@@ -11,4 +11,6 @@ type MediaChapterService interface {
 	GetChapterImagesByChapterUrl(ctx context.Context, url string) ([]dto.ChapterImageRes, error)
 
 	CreateMediaChapters(ctx context.Context, req *dto.CreateMediaChapterReq) (*dto.MediaChapterRes, error)
+
+	CreateChapterImages(ctx context.Context, req *dto.CreateChapterImageReq) (*dto.ChapterImageRes, error)
 }

@@ -11,4 +11,8 @@ type MediaChapterRepository interface {
 	GetChapterImagesByChapterUrl(ctx context.Context, url string) ([]entity.ChapterImage, error)
 
 	CreateMediaChapters(ctx context.Context, chapters []*entity.MediaChapter) ([]entity.MediaChapter, error)
+
+	CreateChapterImages(ctx context.Context, images []*entity.ChapterImage) ([]entity.ChapterImage, error)
+
+	FindChapterByMediaUrlAndOrder(ctx context.Context, mediaUrl string, order int64) (*entity.MediaChapter, error)
 }
