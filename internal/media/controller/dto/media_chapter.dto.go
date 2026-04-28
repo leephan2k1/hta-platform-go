@@ -39,12 +39,10 @@ func (r *MediaChapterRes) SetData(chapter entity.MediaChapter) {
 
 type ChapterImageRes struct {
 	ID    string `json:"id"`
-	URL   string `json:"url"`
 	Order int64  `json:"order"`
 }
 
 func (r *ChapterImageRes) SetData(image entity.ChapterImage) {
 	r.ID = image.ID.String()
-	r.URL = image.URL
 	r.Order = image.Order
 }

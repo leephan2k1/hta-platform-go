@@ -15,5 +15,5 @@ type Image struct {
 }
 
 func (Image) TableName() string {
-	return "hta.images"
+	return "hta.image"
 }
