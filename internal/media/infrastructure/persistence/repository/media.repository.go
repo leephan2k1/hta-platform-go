@@ -1,8 +1,11 @@
 package repository
 
 import (
+	"context"
+	"hta-platform/internal/media/controller/dto"
 	"hta-platform/internal/media/domain/model/entity"
 	"hta-platform/internal/media/domain/repository"
+	"strings"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -11,6 +14,76 @@ import (
 
 type mediaRepository struct {
 	db *gorm.DB
+}
+
+// GetMedias implements [repository.MediaRepository].
+func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]entity.Media, int64, error) {
+	r, ok := req.(*dto.GetMediasReq)
+	if !ok {
+		return nil, 0, nil
+	}
+
+	query := m.db.WithContext(ctx).Model(&entity.Media{})
+
+	// 1. Filtering
+	if r.Name != "" {
+		query = query.Where("LOWER(name) ILIKE ?", "%"+strings.ToLower(r.Name)+"%")
+	}
+
+	query = query.Where("is_nsfw = ?", r.IsNSFW)
+
+	if len(r.Authors) > 0 {
+		query = query.Joins("JOIN hta.media_to_author ma ON ma.media_id = hta.media.id").
+			Joins("JOIN hta.author a ON a.id = ma.author_id").
+			Where("a.author_url IN ?", r.Authors)
+	}
+
+	if len(r.Categories) > 0 {
+		query = query.Joins("JOIN hta.media_to_category mc ON mc.media_id = hta.media.id").
+			Joins("JOIN hta.category c ON c.id = mc.category_id").
+			Where("c.slug IN ?", r.Categories)
+	}
+
+	// 2. Count total before pagination
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 3. Preload for info
+	query = query.Preload("Authors").Preload("Categories")
+
+	// 4. Sorting
+	if len(r.SortBy) > 0 {
+		for _, sort := range r.SortBy {
+			switch strings.ToLower(sort) {
+			case "updatedat":
+				query = query.Order("updated_at DESC")
+			case "name":
+				query = query.Order("name DESC")
+			}
+		}
+	} else {
+		query = query.Order("updated_at DESC")
+	}
+
+	// 5. Pagination
+	limit := r.Limit
+	if limit <= 0 {
+		limit = 25
+	}
+	page := r.Page
+	if page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * limit
+
+	var items []entity.Media
+	if err := query.Limit(limit).Offset(offset).Find(&items).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return items, total, nil
 }
 
 // CreateMedia implements [repository.MediaRepository].

@@ -7,7 +7,9 @@ import (
 )
 
 type MediaService interface {
-	CreateMedia(ctx context.Context, req *dto.MediaReq) (entity.Media, error)
+	GetMedias(ctx context.Context, req *dto.GetMediasReq) (dto.GetMediasRes, error)
 
-	UpdateMedia(ctx context.Context, url string, req *dto.MediaReq) (entity.Media, error)
+	CreateMedia(ctx context.Context, req *dto.CreateMediaReq) (entity.Media, error)
+
+	UpdateMedia(ctx context.Context, url string, req *dto.CreateMediaReq) (entity.Media, error)
 }

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"hta-platform/internal/media/domain/model/entity"
 
 	"github.com/google/uuid"
@@ -8,6 +9,8 @@ import (
 )
 
 type MediaRepository interface {
+	GetMedias(ctx context.Context, req interface{}) ([]entity.Media, int64, error)
+
 	// CreateMedia inserts a new media record. Uses ON CONFLICT DO NOTHING on the url column.
 	// Returns the created media and a boolean indicating if it was actually inserted (false = duplicate).
 	CreateMedia(tx *gorm.DB, media *entity.Media) (*entity.Media, bool, error)

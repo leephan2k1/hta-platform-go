@@ -19,8 +19,34 @@ func NewMediaHandler(mediaService service.MediaService) *MediaHandler {
 	return &MediaHandler{mediaService: mediaService}
 }
 
+func (h *MediaHandler) GetMedias(c *gin.Context) (interface{}, error) {
+	var req dto.GetMediasReq
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		return nil, err
+	}
+	req.Normalize()
+
+	validation, exists := c.Get("validation")
+	if !exists {
+		return nil, response.NewAPIError(http.StatusInternalServerError, "Invalid request", "Validation not found in context")
+	}
+
+	apiErr := utils.ValidateStruct(&req, validation.(*validator.Validate))
+	if apiErr != nil {
+		return nil, apiErr
+	}
+
+	medias, err := h.mediaService.GetMedias(c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return medias, nil
+}
+
 func (h *MediaHandler) CreateMedia(c *gin.Context) (interface{}, error) {
-	var req dto.MediaReq
+	var req dto.CreateMediaReq
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -49,7 +75,7 @@ func (h *MediaHandler) CreateMedia(c *gin.Context) (interface{}, error) {
 func (h *MediaHandler) UpdateMedia(c *gin.Context) (interface{}, error) {
 	url := c.Param("url")
 
-	var req dto.MediaReq
+	var req dto.CreateMediaReq
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
