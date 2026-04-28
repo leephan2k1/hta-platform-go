@@ -39,8 +39,11 @@ func (m *MediaChapterServiceImpl) CreateChapterImages(ctx context.Context, req *
 			}
 		}
 
-		// 3. Insert batch ChapterImage slice first
-		if err := tx.Create(&chapterImages).Error; err != nil {
+		// 3. Insert batch ChapterImage slice first (Upsert avoid duplicate)
+		if err := tx.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "order"}, {Name: "chapter_id"}},
+			DoUpdates: clause.AssignmentColumns([]string{"updated_at"}),
+		}).Create(&chapterImages).Error; err != nil {
 			return err
 		}
 

@@ -7,7 +7,7 @@ import (
 )
 
 type Image struct {
-	base.CommonModel
+	base.BaseModel
 	URL         string    `gorm:"column:url;unique;not null" json:"url"`
 	Description string    `gorm:"column:description" json:"description"`
 	ResourceID  uuid.UUID `gorm:"column:resource_id;type:uuid;not null" json:"resource_id"`
