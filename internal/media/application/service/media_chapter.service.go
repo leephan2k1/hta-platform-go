@@ -1,0 +1,12 @@
+package service
+
+import (
+	"context"
+	"hta-platform/internal/media/controller/dto"
+)
+
+type MediaChapterService interface {
+	GetMediaChaptersByMediaUrl(ctx context.Context, url string) ([]dto.MediaChapterRes, error)
+
+	GetChapterImagesByChapterUrl(ctx context.Context, url string) ([]dto.ChapterImageRes, error)
+}
