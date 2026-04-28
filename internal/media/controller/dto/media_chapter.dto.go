@@ -5,7 +5,7 @@ import (
 )
 
 type CreateMediaChapterReq struct {
-	MediaUrl string             `json:"media_url" binding:"required" validate:"required,url" dc:"Media URL"`
+	MediaUrl string             `json:"media_url" binding:"required" validate:"required" dc:"Media URL"`
 	Chapters []CreateChapterReq `json:"chapters" binding:"required" validate:"required" dc:"Danh sách chapter"`
 }
 

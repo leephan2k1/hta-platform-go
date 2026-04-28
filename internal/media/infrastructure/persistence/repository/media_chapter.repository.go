@@ -50,8 +50,9 @@ func (m *mediaChapterRepository) GetMediaChaptersByMediaUrl(ctx context.Context,
 	err := m.db.WithContext(ctx).
 		Joins("JOIN hta.media m ON m.id = hta.media_chapter.media_id").
 		Where("m.url = ?", url).
-		Order("hta.media_chapter.order ASC").
+		Order("hta.media_chapter.order DESC").
 		Find(&chapters).Error
+
 	return chapters, err
 }
 
