@@ -9,6 +9,8 @@ import (
 )
 
 type MediaRepository interface {
+	GetMediaByUrl(ctx context.Context, url string) (entity.Media, error)
+
 	GetMedias(ctx context.Context, req interface{}) ([]entity.Media, int64, error)
 
 	// CreateMedia inserts a new media record. Uses ON CONFLICT DO NOTHING on the url column.

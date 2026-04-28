@@ -3,8 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	authorDto "hta-platform/internal/author/controller/dto"
-	categoryDto "hta-platform/internal/category/controller/dto"
 	"hta-platform/internal/media/controller/dto"
 	"hta-platform/internal/media/domain/model/entity"
 	"hta-platform/internal/media/domain/repository"
@@ -21,6 +19,19 @@ type mediaService struct {
 	db        *gorm.DB
 }
 
+// GetMediaByUrl implements [MediaService].
+func (m *mediaService) GetMediaByUrl(ctx context.Context, url string) (dto.MediaResponse, error) {
+	media, err := m.mediaRepo.GetMediaByUrl(ctx, url)
+	if err != nil {
+		return dto.MediaResponse{}, err
+	}
+
+	var res dto.MediaResponse
+	res.SetData(media)
+
+	return res, nil
+}
+
 // GetMedias implements [MediaService].
 func (m *mediaService) GetMedias(ctx context.Context, req *dto.GetMediasReq) (dto.GetMediasRes, error) {
 	items, total, err := m.mediaRepo.GetMedias(ctx, req)
@@ -31,47 +42,9 @@ func (m *mediaService) GetMedias(ctx context.Context, req *dto.GetMediasReq) (dt
 	var res dto.GetMediasRes
 	res.SetPagination(total, req.Page, req.Limit)
 
-	res.Items = make([]dto.MediaResponse, 0, len(items))
-	for _, media := range items {
-		mediaRes := dto.MediaResponse{
-			ID:          media.ID.String(),
-			CreatedAt:   media.CreatedAt,
-			UpdatedAt:   media.UpdatedAt,
-			Name:        media.Name,
-			Description: media.Description,
-			URL:         media.URL,
-			StatusID:    media.StatusID.String(),
-			TypeID:      media.TypeID.String(),
-			IsNSFW:      media.IsNSFW,
-			Thumbnail:   media.Thumbnail,
-			Source:      media.Source,
-		}
-
-		// Map Categories
-		if len(media.Categories) > 0 {
-			mediaRes.Categories = make([]categoryDto.CategoryRes, len(media.Categories))
-			for i, cat := range media.Categories {
-				mediaRes.Categories[i] = categoryDto.CategoryRes{
-					ID:   cat.ID.String(),
-					Name: cat.Name,
-					Slug: cat.Slug,
-				}
-			}
-		}
-
-		// Map Authors
-		if len(media.Authors) > 0 {
-			mediaRes.Authors = make([]authorDto.AuthorRes, len(media.Authors))
-			for i, author := range media.Authors {
-				mediaRes.Authors[i] = authorDto.AuthorRes{
-					ID:        author.ID.String(),
-					Name:      author.Name,
-					AuthorURL: author.AuthorURL,
-				}
-			}
-		}
-
-		res.Items = append(res.Items, mediaRes)
+	res.Items = make([]dto.MediaResponse, len(items))
+	for i, media := range items {
+		res.Items[i].SetData(media)
 	}
 
 	return res, nil

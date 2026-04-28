@@ -3,9 +3,12 @@ package dto
 import (
 	authorDto "hta-platform/internal/author/controller/dto"
 	categoryDto "hta-platform/internal/category/controller/dto"
+	"hta-platform/internal/media/domain/model/entity"
 	"hta-platform/pkg/base"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type MediaResponse struct {
@@ -16,12 +19,114 @@ type MediaResponse struct {
 	Description string                    `json:"description"`
 	URL         string                    `json:"url"`
 	StatusID    string                    `json:"status_id"`
+	Status      *StatusRes                `json:"status,omitempty"`
 	TypeID      string                    `json:"type_id"`
+	Type        *TypeRes                  `json:"type,omitempty"`
 	IsNSFW      bool                      `json:"is_nsfw"`
 	Thumbnail   string                    `json:"thumbnail"`
 	Source      string                    `json:"source"`
 	Categories  []categoryDto.CategoryRes `json:"categories,omitempty"`
 	Authors     []authorDto.AuthorRes     `json:"authors,omitempty"`
+	OtherNames  []OtherNameRes            `json:"other_names,omitempty"`
+	Chapters    []ChapterRes              `json:"chapters,omitempty"`
+}
+
+func (r *MediaResponse) SetData(media entity.Media) {
+	r.ID = media.ID.String()
+	r.CreatedAt = media.CreatedAt
+	r.UpdatedAt = media.UpdatedAt
+	r.Name = media.Name
+	r.Description = media.Description
+	r.URL = media.URL
+	r.StatusID = media.StatusID.String()
+	r.TypeID = media.TypeID.String()
+	r.IsNSFW = media.IsNSFW
+	r.Thumbnail = media.Thumbnail
+	r.Source = media.Source
+
+	if media.Status.ID != uuid.Nil {
+		r.Status = &StatusRes{}
+		r.Status.SetData(media.Status)
+	}
+
+	if media.Type.ID != uuid.Nil {
+		r.Type = &TypeRes{}
+		r.Type.SetData(media.Type)
+	}
+
+	if len(media.Categories) > 0 {
+		r.Categories = make([]categoryDto.CategoryRes, len(media.Categories))
+		for i, cat := range media.Categories {
+			r.Categories[i].SetData(cat)
+		}
+	}
+
+	if len(media.Authors) > 0 {
+		r.Authors = make([]authorDto.AuthorRes, len(media.Authors))
+		for i, author := range media.Authors {
+			r.Authors[i].SetData(author)
+		}
+	}
+
+	if len(media.OtherNames) > 0 {
+		r.OtherNames = make([]OtherNameRes, len(media.OtherNames))
+		for i, on := range media.OtherNames {
+			r.OtherNames[i].SetData(on)
+		}
+	}
+
+	if len(media.Chapters) > 0 {
+		r.Chapters = make([]ChapterRes, len(media.Chapters))
+		for i, ch := range media.Chapters {
+			r.Chapters[i].SetData(ch)
+		}
+	}
+}
+
+type StatusRes struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func (r *StatusRes) SetData(status entity.Status) {
+	r.ID = status.ID.String()
+	r.Name = status.Name
+}
+
+type TypeRes struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func (r *TypeRes) SetData(mediaType entity.Type) {
+	r.ID = mediaType.ID.String()
+	r.Name = mediaType.Name
+}
+
+type OtherNameRes struct {
+	Name     string `json:"name"`
+	Language string `json:"language"`
+}
+
+func (r *OtherNameRes) SetData(on entity.MediaOtherName) {
+	r.Name = on.Name
+	r.Language = on.Language
+}
+
+type ChapterRes struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	URL      string `json:"url"`
+	Language string `json:"language"`
+	Order    int64  `json:"order"`
+}
+
+func (r *ChapterRes) SetData(chapter entity.MediaChapter) {
+	r.ID = chapter.ID.String()
+	r.Name = chapter.Name
+	r.URL = chapter.URL
+	r.Language = chapter.Language
+	r.Order = chapter.Order
 }
 
 type GetMediasReq struct {

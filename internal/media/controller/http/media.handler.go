@@ -19,6 +19,17 @@ func NewMediaHandler(mediaService service.MediaService) *MediaHandler {
 	return &MediaHandler{mediaService: mediaService}
 }
 
+func (h *MediaHandler) GetMediaByUrl(c *gin.Context) (interface{}, error) {
+	url := c.Param("url")
+
+	media, err := h.mediaService.GetMediaByUrl(c, url)
+	if err != nil {
+		return nil, err
+	}
+
+	return media, nil
+}
+
 func (h *MediaHandler) GetMedias(c *gin.Context) (interface{}, error) {
 	var req dto.GetMediasReq
 

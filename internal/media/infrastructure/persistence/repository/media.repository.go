@@ -16,6 +16,24 @@ type mediaRepository struct {
 	db *gorm.DB
 }
 
+// GetMediaByUrl implements [repository.MediaRepository].
+func (m *mediaRepository) GetMediaByUrl(ctx context.Context, url string) (entity.Media, error) {
+	var media entity.Media
+	err := m.db.WithContext(ctx).
+		Preload("Status").
+		Preload("Type").
+		Preload("Categories").
+		Preload("Authors").
+		Preload("OtherNames").
+		Preload("Chapters", func(db *gorm.DB) *gorm.DB {
+			return db.Order("hta.media_chapter.order DESC")
+		}).
+		Where("url = ?", url).
+		First(&media).Error
+
+	return media, err
+}
+
 // GetMedias implements [repository.MediaRepository].
 func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]entity.Media, int64, error) {
 	r, ok := req.(*dto.GetMediasReq)
