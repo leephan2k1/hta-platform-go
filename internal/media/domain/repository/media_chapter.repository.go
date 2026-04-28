@@ -9,4 +9,6 @@ type MediaChapterRepository interface {
 	GetMediaChaptersByMediaUrl(ctx context.Context, url string) ([]entity.MediaChapter, error)
 
 	GetChapterImagesByChapterUrl(ctx context.Context, url string) ([]entity.ChapterImage, error)
+
+	CreateMediaChapters(ctx context.Context, chapters []*entity.MediaChapter) ([]entity.MediaChapter, error)
 }

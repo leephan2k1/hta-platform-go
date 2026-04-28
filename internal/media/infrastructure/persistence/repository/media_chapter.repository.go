@@ -6,10 +6,31 @@ import (
 	"hta-platform/internal/media/domain/repository"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type mediaChapterRepository struct {
 	db *gorm.DB
+}
+
+// CreateMediaChapters implements [repository.MediaChapterRepository].
+func (m *mediaChapterRepository) CreateMediaChapters(ctx context.Context, chapters []*entity.MediaChapter) ([]entity.MediaChapter, error) {
+	err := m.db.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "url"}},
+			DoUpdates: clause.AssignmentColumns([]string{"name", "order", "source", "language", "updated_at"}),
+		}).Create(&chapters).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]entity.MediaChapter, len(chapters))
+	for i, ch := range chapters {
+		res[i] = *ch
+	}
+
+	return res, nil
 }
 
 // GetChapterImagesByChapterUrl implements [repository.MediaChapterRepository].

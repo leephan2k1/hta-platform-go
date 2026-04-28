@@ -10,7 +10,8 @@ import (
 
 func InitMediaChapter(db *gorm.DB) *http.MediaChapterHandler {
 	repo := repository.NewMediaChapterRepository(db)
-	svc := service.NewMediaChapterServiceImpl(repo)
+	mediaRepo := repository.NewMediaRepository(db)
+	svc := service.NewMediaChapterServiceImpl(repo, mediaRepo)
 	handler := http.NewMediaChapterHandler(svc)
 	return handler
 }

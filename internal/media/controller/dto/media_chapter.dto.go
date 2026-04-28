@@ -4,6 +4,16 @@ import (
 	"hta-platform/internal/media/domain/model/entity"
 )
 
+type CreateMediaChapterReq struct {
+	MediaUrl string             `json:"media_url" binding:"required" validate:"required,url" dc:"Media URL"`
+	Chapters []CreateChapterReq `json:"chapters" binding:"required" validate:"required" dc:"Danh sách chapter"`
+}
+
+type CreateChapterReq struct {
+	Name  string `json:"name" binding:"required" validate:"required,min=1" dc:"Tên chapter"`
+	Order int64  `json:"order" binding:"required" validate:"required" dc:"Thứ tự chapter"`
+}
+
 type MediaChapterRes struct {
 	ID       string            `json:"id"`
 	Name     string            `json:"name"`
