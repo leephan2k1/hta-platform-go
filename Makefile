@@ -11,8 +11,8 @@ export PATH := $(GOBIN):/usr/local/go/bin:$(PATH)
 BINARY_NAME=server-cli
 MAIN_RUN = ./cmd/server/main.go
 SWAG=$(GOBIN)/swag
-
 AIR=$(GOBIN)/air
+DLV=$(GOBIN)/dlv
 
 # Default target is to build the binary
 all: build
@@ -24,6 +24,11 @@ start:
 dev:
 	@echo "Starting development server with Air..."
 	$(AIR) -c .air.toml
+
+debug:
+	@echo "Starting development server in debug mode with Air..."
+	@mkdir -p tmp
+	$(AIR) -c .air.toml --build.cmd "go build -gcflags='all=-N -l' -o ./tmp/main $(MAIN_RUN)" --build.full_bin "dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./tmp/main --continue"
 
 # Build the binary
 build:
