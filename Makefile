@@ -1,5 +1,9 @@
 # Makefile for SERVER CLI tool
 
+# Load environment variables
+-include .env_dev
+export
+
 # Go parameters
 GOCMD=$(shell which go 2>/dev/null || echo /usr/local/go/bin/go)
 GOBUILD=$(GOCMD) build
@@ -13,6 +17,12 @@ MAIN_RUN = ./cmd/server/main.go
 SWAG=$(GOBIN)/swag
 AIR=$(GOBIN)/air
 DLV=$(GOBIN)/dlv
+GOOSE=$(GOBIN)/goose
+
+# Database connection for migration
+DB_URL="host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable"
+GOOSE_DIR=db/sql
+GOOSE_CMD=$(GOOSE) -dir $(GOOSE_DIR) postgres $(DB_URL)
 
 # Default target is to build the binary
 all: build
@@ -41,6 +51,23 @@ clean:
 swag:
 	@echo "Generating Swagger documentation..."
 	$(SWAG) init -g $(MAIN_RUN) -o ./cmd/swag/docs
+
+# Migration commands
+create:
+	@read -p "Enter migration name: " name; \
+	$(GOOSE) -dir $(GOOSE_DIR) create $$name sql
+
+up:
+	$(GOOSE_CMD) up
+
+down:
+	$(GOOSE_CMD) down
+
+status:
+	$(GOOSE_CMD) status
+
+reset:
+	$(GOOSE_CMD) reset
 	
 # Cross-platform builds
 build-linux:
@@ -59,4 +86,4 @@ build-all: build-linux build-windows build-mac
 install:
 	$(GOBUILD) -o $(GOPATH)/bin/$(BINARY_NAME) -v $(MAIN_RUN)
 
-.PHONY: all build clean build-linux build-windows build-mac build-all install start dev
+.PHONY: all build clean build-linux build-windows build-mac build-all install start dev create up down status reset
