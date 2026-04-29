@@ -85,7 +85,10 @@ func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]ent
 	}
 
 	// 3. Preload for info
-	query = query.Preload("Authors").Preload("Categories")
+	query = query.Preload("Authors").Preload("Categories").
+		Preload("Chapters", func(db *gorm.DB) *gorm.DB {
+			return db.Select("DISTINCT ON (media_id) *").Order("media_id, hta.media_chapter.order DESC")
+		})
 
 	// 4. Sorting
 	if len(r.SortBy) > 0 {
