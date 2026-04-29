@@ -12,6 +12,7 @@ import (
 	"hta-platform/internal/middleware"
 	"hta-platform/pkg/response"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -38,6 +39,7 @@ func InitRouter(db *gorm.DB, isLogger string) *gin.Engine {
 	// r.Use() // logging
 
 	// r.Use() // limiter global
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	// r.Use(middleware.Validator())      // middleware
 
 	// r.Use(middlewares.NewRateLimiter().GlobalRateLimiter()) // 100 req/s
