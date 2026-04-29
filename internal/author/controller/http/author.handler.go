@@ -46,6 +46,15 @@ func (a *AuthorHandler) CreateAuthor(c *gin.Context) (res interface{}, err error
 	return newAuthor, nil
 }
 
+func (a *AuthorHandler) GetAuthors(c *gin.Context) (res interface{}, err error) {
+	var req dto.GetAuthorsReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		return nil, err
+	}
+
+	return a.authorService.GetAuthors(c, &req)
+}
+
 func (a *AuthorHandler) GetAuthorByUrl(c *gin.Context) (res interface{}, err error) {
 	url := c.Param("url")
 	author, err := a.authorService.GetAuthorByUrl(c, url)
