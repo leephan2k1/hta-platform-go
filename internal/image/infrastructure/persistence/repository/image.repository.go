@@ -2,19 +2,28 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"hta-platform/internal/image/domain/model/entity"
 	"hta-platform/internal/image/domain/repository"
+	"hta-platform/internal/image/infrastructure/streamer"
+	"io"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type imageRepository struct {
-	db *gorm.DB
+	db        *gorm.DB
+	streamers map[string]streamer.ImageStreamer
 }
 
-func NewImageRepository(db *gorm.DB) repository.ImageRepository {
-	return &imageRepository{db: db}
+// StreamImage implements [repository.ImageRepository].
+func (r *imageRepository) StreamImage(ctx context.Context, url string, source string) (io.ReadCloser, error) {
+	s, ok := r.streamers[source]
+	if !ok {
+		return nil, fmt.Errorf("unsupported source: %s", source)
+	}
+	return s.Stream(ctx, url)
 }
 
 func (r *imageRepository) CreateImages(ctx context.Context, images []*entity.Image) ([]entity.Image, error) {
@@ -42,4 +51,8 @@ func (r *imageRepository) GetImagesByResourceId(ctx context.Context, resourceId 
 		Find(&images).Error
 
 	return images, err
+}
+
+func NewImageRepository(db *gorm.DB, streamers map[string]streamer.ImageStreamer) repository.ImageRepository {
+	return &imageRepository{db: db, streamers: streamers}
 }

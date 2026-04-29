@@ -1,7 +1,7 @@
 # Makefile for SERVER CLI tool
 
 # Load environment variables
--include .env_dev
+-include .env
 export
 
 # Go parameters

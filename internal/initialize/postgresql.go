@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"fmt"
+	"hta-platform/global"
 	"log"
 	"os"
 	"time"
@@ -14,9 +15,9 @@ import (
 
 var DB *gorm.DB // global variable to store DB instance
 
-func InitDB(cfg *Config) (*gorm.DB, error) {
+func InitDB() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-		cfg.DBHost, cfg.DBUser, cfg.DBPass, cfg.DBName, cfg.DBPort)
+		global.ConfigValue.DBHost, global.ConfigValue.DBUser, global.ConfigValue.DBPass, global.ConfigValue.DBName, global.ConfigValue.DBPort)
 
 	log.Printf("Database connection string: %s", dsn)
 
