@@ -3,6 +3,7 @@ package dto
 import (
 	authorDto "hta-platform/internal/author/controller/dto"
 	categoryDto "hta-platform/internal/category/controller/dto"
+	imageEntity "hta-platform/internal/image/domain/model/entity"
 	"hta-platform/internal/media/domain/model/entity"
 	"hta-platform/pkg/base"
 	"strings"
@@ -30,6 +31,7 @@ type MediaResponse struct {
 	Authors     []authorDto.AuthorRes     `json:"authors,omitempty"`
 	OtherNames  []OtherNameRes            `json:"other_names,omitempty"`
 	Chapters    []ChapterRes              `json:"chapters,omitempty"`
+	Images      []ImageRes                `json:"images,omitempty"`
 }
 
 func (r *MediaResponse) SetData(media entity.Media) {
@@ -83,6 +85,13 @@ func (r *MediaResponse) SetData(media entity.Media) {
 			r.Chapters[i].SetData(ch)
 		}
 	}
+
+	if len(media.Images) > 0 {
+		r.Images = make([]ImageRes, len(media.Images))
+		for i, img := range media.Images {
+			r.Images[i].SetData(img)
+		}
+	}
 }
 
 type StatusRes struct {
@@ -129,6 +138,20 @@ func (r *ChapterRes) SetData(chapter entity.MediaChapter) {
 	r.URL = chapter.URL
 	r.Language = chapter.Language
 	r.Order = chapter.Order
+}
+
+type ImageRes struct {
+	ID          string `json:"id"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Source      string `json:"source"`
+}
+
+func (r *ImageRes) SetData(img imageEntity.Image) {
+	r.ID = img.ID.String()
+	r.URL = img.URL
+	r.Description = img.Description
+	r.Source = img.Source
 }
 
 type GetMediasReq struct {

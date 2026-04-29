@@ -3,6 +3,7 @@ package entity
 import (
 	authorEntity "hta-platform/internal/author/domain/model/entity"
 	categoryEntity "hta-platform/internal/category/domain/model/entity"
+	imageEntity "hta-platform/internal/image/domain/model/entity"
 	"hta-platform/pkg/base"
 
 	"github.com/google/uuid"
@@ -25,6 +26,7 @@ type Media struct {
 	Authors     []authorEntity.Author     `gorm:"many2many:hta.media_to_author;foreignKey:ID;joinForeignKey:MediaID;References:ID;joinReferences:AuthorID" json:"authors,omitempty"`
 	OtherNames  []MediaOtherName          `gorm:"foreignKey:MediaID;references:ID" json:"other_names,omitempty"`
 	Chapters    []MediaChapter            `gorm:"foreignKey:MediaID;references:ID" json:"chapters,omitempty"`
+	Images      []imageEntity.Image       `gorm:"foreignKey:ResourceID;references:ID" json:"images,omitempty"`
 }
 
 func (Media) TableName() string {

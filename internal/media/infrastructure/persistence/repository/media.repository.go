@@ -25,6 +25,7 @@ func (m *mediaRepository) GetMediaByUrl(ctx context.Context, url string) (entity
 		Preload("Categories").
 		Preload("Authors").
 		Preload("OtherNames").
+		Preload("Images").
 		Preload("Chapters", func(db *gorm.DB) *gorm.DB {
 			return db.Order("hta.media_chapter.order DESC")
 		}).
@@ -88,7 +89,7 @@ func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]ent
 	}
 
 	// 3. Preload for info
-	query = query.Preload("Authors").Preload("Categories").
+	query = query.Preload("Authors").Preload("Categories").Preload("Images").
 		Preload("Chapters", func(db *gorm.DB) *gorm.DB {
 			return db.Select("DISTINCT ON (media_id) *").Order("media_id, hta.media_chapter.order DESC")
 		})
