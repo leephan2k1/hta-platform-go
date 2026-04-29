@@ -12,9 +12,9 @@ type GetAuthorsRes struct {
 }
 
 type GetAuthorsReq struct {
-	Name  string `query:"name" dc:"Tên tác giả"`
-	Page  int    `query:"page" dc:"Trang"`
-	Limit int    `query:"limit" dc:"Giới hạn"`
+	Name  string `form:"name" dc:"Tên tác giả"`
+	Page  int    `form:"page" dc:"Trang"`
+	Limit int    `form:"limit" dc:"Giới hạn"`
 }
 
 type AuthorReq struct {
