@@ -1,22 +1,19 @@
 package dto
 
-type UserProfileReq struct {
-	// AccountID int64 `json:"account_id" binding:"required"`
-	AccountID int64 `json:"account_id" validate:"required,min=1,max=50"`
+import "strings"
+
+type RegisterUserReq struct {
+	Auth0Id    string `json:"auth0Id" validate:"required,min=1"`
+	Email      string `json:"email" validate:"required,min=1,email"`
+	Picture    string `json:"picture" validate:"omitempty"`
+	GivenName  string `json:"givenName" validate:"omitempty"`
+	FamilyName string `json:"familyName" validate:"omitempty"`
 }
 
-type UserProfileRes struct {
-	AccountID int64 `json:"account_id" binding:"required"`
-	Data      struct {
-		Token        string `json:"token" dc:"JWT token"`
-		RefreshToken string `json:"refreshToken" dc:"Refresh token"`
-		TTL          int64  `json:"ttl" dc:"Token lifetime (in seconds)"`
-		AccountInfo  struct {
-			Id       int64  `json:"id" dc:"Account ID"`
-			Username string `json:"username" dc:"Username"`
-			Email    string `json:"email" dc:"Email address"`
-			Status   int    `json:"status" dc:"Account status"`
-			Lang     string `json:"lang" dc:"Preferred language"`
-		} `json:"accountInfo" dc:"Basic account information"`
-	} `json:"data"`
+func (r *RegisterUserReq) Normalize() {
+	r.Auth0Id = strings.TrimSpace(r.Auth0Id)
+	r.Email = strings.TrimSpace(r.Email)
+	r.Picture = strings.TrimSpace(r.Picture)
+	r.GivenName = strings.TrimSpace(r.GivenName)
+	r.FamilyName = strings.TrimSpace(r.FamilyName)
 }
