@@ -12,4 +12,6 @@ func RegisterAuthorRoutes(rg *gin.RouterGroup, handler *AuthorHandler) {
 	a.POST("/", response.Wrap(handler.CreateAuthor))
 
 	a.GET("/:url", response.Wrap(handler.GetAuthorByUrl))
+
+	a.GET("", response.Wrap(handler.GetAuthors))
 }

@@ -3,8 +3,11 @@ package initialize
 import (
 	authorHttp "hta-platform/internal/author/controller/http"
 	categoryHttp "hta-platform/internal/category/controller/http"
+	"hta-platform/global"
+	imageHttp "hta-platform/internal/image/controller/http"
 	initializeAuthor "hta-platform/internal/initialize/author"
 	initializeCategory "hta-platform/internal/initialize/category"
+	initializeImage "hta-platform/internal/initialize/image"
 	initializeMedia "hta-platform/internal/initialize/media"
 	initializeMediaChapter "hta-platform/internal/initialize/media_chapter"
 	mediaChapterHttp "hta-platform/internal/media/controller/http"
@@ -12,18 +15,19 @@ import (
 	"hta-platform/internal/middleware"
 	"hta-platform/pkg/response"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func InitRouter(db *gorm.DB, isLogger string) *gin.Engine {
+func InitRouter(db *gorm.DB) *gin.Engine {
 	// Initialize the router
 	// This function will set up the routes and middleware for the application
 	// It will return a gin.Engine instance that can be used to run the server
 
 	var r *gin.Engine
 	// Set the mode based on the environment
-	if isLogger == "debug" {
+	if global.ConfigValue.LogLevel == "debug" {
 		gin.SetMode(gin.DebugMode)
 		gin.ForceConsoleColor()
 		r = gin.Default()
@@ -38,6 +42,7 @@ func InitRouter(db *gorm.DB, isLogger string) *gin.Engine {
 	// r.Use() // logging
 
 	// r.Use() // limiter global
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	// r.Use(middleware.Validator())      // middleware
 
 	// r.Use(middlewares.NewRateLimiter().GlobalRateLimiter()) // 100 req/s
@@ -65,6 +70,9 @@ func InitRouter(db *gorm.DB, isLogger string) *gin.Engine {
 
 	mediaChapterHandler := initializeMediaChapter.InitMediaChapter(db)
 	mediaChapterHttp.RegisterMediaChapterRoutes(v1, mediaChapterHandler)
+
+	imageHandler := initializeImage.InitImage(db)
+	imageHttp.RegisterImageRoutes(v1, imageHandler)
 
 	return r
 }

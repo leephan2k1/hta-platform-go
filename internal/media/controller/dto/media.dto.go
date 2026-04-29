@@ -3,6 +3,7 @@ package dto
 import (
 	authorDto "hta-platform/internal/author/controller/dto"
 	categoryDto "hta-platform/internal/category/controller/dto"
+	imageEntity "hta-platform/internal/image/domain/model/entity"
 	"hta-platform/internal/media/domain/model/entity"
 	"hta-platform/pkg/base"
 	"strings"
@@ -25,10 +26,12 @@ type MediaResponse struct {
 	IsNSFW      bool                      `json:"is_nsfw"`
 	Thumbnail   string                    `json:"thumbnail"`
 	Source      string                    `json:"source"`
+	SysStatus   string                    `json:"sys_status"`
 	Categories  []categoryDto.CategoryRes `json:"categories,omitempty"`
 	Authors     []authorDto.AuthorRes     `json:"authors,omitempty"`
 	OtherNames  []OtherNameRes            `json:"other_names,omitempty"`
 	Chapters    []ChapterRes              `json:"chapters,omitempty"`
+	Images      []ImageRes                `json:"images,omitempty"`
 }
 
 func (r *MediaResponse) SetData(media entity.Media) {
@@ -43,6 +46,7 @@ func (r *MediaResponse) SetData(media entity.Media) {
 	r.IsNSFW = media.IsNSFW
 	r.Thumbnail = media.Thumbnail
 	r.Source = media.Source
+	r.SysStatus = media.SysStatus
 
 	if media.Status.ID != uuid.Nil {
 		r.Status = &StatusRes{}
@@ -79,6 +83,13 @@ func (r *MediaResponse) SetData(media entity.Media) {
 		r.Chapters = make([]ChapterRes, len(media.Chapters))
 		for i, ch := range media.Chapters {
 			r.Chapters[i].SetData(ch)
+		}
+	}
+
+	if len(media.Images) > 0 {
+		r.Images = make([]ImageRes, len(media.Images))
+		for i, img := range media.Images {
+			r.Images[i].SetData(img)
 		}
 	}
 }
@@ -129,12 +140,27 @@ func (r *ChapterRes) SetData(chapter entity.MediaChapter) {
 	r.Order = chapter.Order
 }
 
+type ImageRes struct {
+	ID          string `json:"id"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Source      string `json:"source"`
+}
+
+func (r *ImageRes) SetData(img imageEntity.Image) {
+	r.ID = img.ID.String()
+	r.URL = img.URL
+	r.Description = img.Description
+	r.Source = img.Source
+}
+
 type GetMediasReq struct {
 	Name       string   `form:"name"`
 	SortBy     []string `form:"sortBy"`
 	Authors    []string `form:"authors"`
 	Categories []string `form:"categories"`
 	IsNSFW     bool     `form:"isNSFW"`
+	SysStatus  string   `form:"sysStatus"`
 	Limit      int      `form:"limit"`
 	Page       int      `form:"page"`
 }

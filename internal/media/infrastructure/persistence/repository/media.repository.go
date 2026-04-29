@@ -25,6 +25,7 @@ func (m *mediaRepository) GetMediaByUrl(ctx context.Context, url string) (entity
 		Preload("Categories").
 		Preload("Authors").
 		Preload("OtherNames").
+		Preload("Images").
 		Preload("Chapters", func(db *gorm.DB) *gorm.DB {
 			return db.Order("hta.media_chapter.order DESC")
 		}).
@@ -49,6 +50,9 @@ func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]ent
 	}
 
 	query = query.Where("is_nsfw = ?", r.IsNSFW)
+	if r.SysStatus != "" {
+		query = query.Where("sys_status = ?", r.SysStatus)
+	}
 
 	if len(r.Authors) > 0 {
 		query = query.Joins("JOIN hta.media_to_author ma ON ma.media_id = hta.media.id").
@@ -57,9 +61,25 @@ func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]ent
 	}
 
 	if len(r.Categories) > 0 {
-		query = query.Joins("JOIN hta.media_to_category mc ON mc.media_id = hta.media.id").
-			Joins("JOIN hta.category c ON c.id = mc.category_id").
-			Where("c.slug IN ?", r.Categories)
+		var includeSlugs []string
+		var excludeSlugs []string
+		for _, cat := range r.Categories {
+			if strings.HasPrefix(cat, "!") {
+				excludeSlugs = append(excludeSlugs, strings.TrimPrefix(cat, "!"))
+			} else {
+				includeSlugs = append(includeSlugs, cat)
+			}
+		}
+
+		if len(includeSlugs) > 0 {
+			query = query.Joins("JOIN hta.media_to_category mc ON mc.media_id = hta.media.id").
+				Joins("JOIN hta.category c ON c.id = mc.category_id").
+				Where("c.slug IN ?", includeSlugs)
+		}
+
+		if len(excludeSlugs) > 0 {
+			query = query.Where("NOT EXISTS (SELECT 1 FROM hta.media_to_category mc_ex JOIN hta.category c_ex ON c_ex.id = mc_ex.category_id WHERE mc_ex.media_id = hta.media.id AND c_ex.slug IN ?)", excludeSlugs)
+		}
 	}
 
 	// 2. Count total before pagination
@@ -69,7 +89,10 @@ func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]ent
 	}
 
 	// 3. Preload for info
-	query = query.Preload("Authors").Preload("Categories")
+	query = query.Preload("Authors").Preload("Categories").Preload("Images").
+		Preload("Chapters", func(db *gorm.DB) *gorm.DB {
+			return db.Select("DISTINCT ON (media_id) *").Order("media_id, hta.media_chapter.order DESC")
+		})
 
 	// 4. Sorting
 	if len(r.SortBy) > 0 {

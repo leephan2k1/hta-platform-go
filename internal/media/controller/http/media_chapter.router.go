@@ -11,5 +11,9 @@ func RegisterMediaChapterRoutes(rg *gin.RouterGroup, handler *MediaChapterHandle
 
 	mc.GET("/by-media/:media-url", response.Wrap(handler.GetMediaChaptersByMediaUrl))
 
-	mc.GET("/:chapter-url", response.Wrap(handler.GetChapterImagesByChapterUrl))
+	mc.GET("/:chapter-url/images", response.Wrap(handler.GetChapterImages))
+
+	mc.POST("", response.Wrap(handler.CreateMediaChapters))
+
+	mc.POST("/images", response.Wrap(handler.CreateChapterImages))
 }

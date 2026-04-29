@@ -4,6 +4,7 @@ import (
 	"context"
 	"hta-platform/internal/author/domain/model/entity"
 	"hta-platform/internal/author/domain/repository"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -34,6 +35,25 @@ func (a *authorRepository) FindAuthorByUrl(ctx context.Context, authorURL string
 		return nil, result.Error
 	}
 	return &author, nil
+}
+
+func (a *authorRepository) FindAuthors(ctx context.Context, name string, limit, offset int) ([]entity.Author, int64, error) {
+	var authors []entity.Author
+	var total int64
+	query := a.DB.Model(&entity.Author{})
+	if name != "" {
+		query = query.Where("LOWER(name) ILIKE ?", "%"+strings.ToLower(name)+"%")
+	}
+
+	query = query.Order("name ASC")
+
+	err := query.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = query.Limit(limit).Offset(offset).Find(&authors).Error
+	return authors, total, err
 }
 
 func NewAuthorRepository(db *gorm.DB) repository.AuthorRepository {

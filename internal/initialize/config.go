@@ -2,26 +2,14 @@ package initialize
 
 import (
 	"fmt"
+	"hta-platform/global"
 
 	"github.com/spf13/viper"
 )
 
-// Config stores all configuration of the application.
-// The values are read by viper from a config file or environment variable.
-type Config struct {
-	// AppEnv        string `mapstructure:"APP_ENV"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPass     string `mapstructure:"DB_PASSWORD"`
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBName     string `mapstructure:"DB_NAME"`
-	ServerPort string `mapstructure:"SERVER_PORT"`
-	LogLevel   string `mapstructure:"LOG_LEVEL"`
-}
-
 // LoadConfig reads configuration from a specific .env file.
-func LoadConfig() (config Config, err error) {
-	viper.SetConfigFile(".env_dev")
+func LoadConfig() (err error) {
+	viper.SetConfigFile(".env")
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
@@ -30,14 +18,17 @@ func LoadConfig() (config Config, err error) {
 	if err != nil {
 		// If the config file is not found, return a specific error
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			return config, fmt.Errorf("config file not found: %w", err)
+			return fmt.Errorf("config file not found: %w", err)
 		}
-		return config, fmt.Errorf("error reading config file: %w", err)
+		return fmt.Errorf("error reading config file: %w", err)
 	}
 
+	var config global.Config
 	err = viper.Unmarshal(&config)
 	if err != nil {
-		return config, fmt.Errorf("unable to decode config into struct: %w", err)
+		return fmt.Errorf("unable to decode config into struct: %w", err)
 	}
+
+	global.ConfigValue = &config
 	return
 }
