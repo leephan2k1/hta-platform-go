@@ -8,11 +8,11 @@ import (
 
 type MediaChapter struct {
 	base.CommonModel
-	Name     string         `gorm:"column:name;unique;not null" json:"name"`
-	URL      string         `gorm:"column:url;unique" json:"url"`
+	Name     string         `gorm:"column:name;not null" json:"name"`
+	URL      string         `gorm:"column:url;uniqueIndex:idx_media_chapter_unique" json:"url"`
 	Language string         `gorm:"column:language" json:"language"`
-	Order    int64          `gorm:"column:order" json:"order"`
-	MediaID  uuid.UUID      `gorm:"column:media_id;type:uuid;not null" json:"media_id"`
+	Order    int64          `gorm:"column:order;uniqueIndex:idx_media_chapter_unique" json:"order"`
+	MediaID  uuid.UUID      `gorm:"column:media_id;type:uuid;not null;uniqueIndex:idx_media_chapter_unique" json:"media_id"`
 	Source   string         `gorm:"column:source" json:"source"`
 	Images   []ChapterImage `gorm:"foreignKey:ChapterID;references:ID" json:"images,omitempty"`
 }

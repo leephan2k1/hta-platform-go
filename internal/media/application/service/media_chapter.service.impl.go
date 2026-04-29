@@ -21,6 +21,21 @@ type MediaChapterServiceImpl struct {
 	db        *gorm.DB
 }
 
+// GetChapterImages implements [MediaChapterService].
+func (m *MediaChapterServiceImpl) GetChapterImages(ctx context.Context, mediaUrl string, chapterUrl string) ([]dto.ChapterImageRes, error) {
+	images, err := m.repo.GetChapterImages(ctx, mediaUrl, chapterUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]dto.ChapterImageRes, len(images))
+	for i, img := range images {
+		res[i].SetData(img)
+	}
+
+	return res, nil
+}
+
 // CreateChapterImages implements [MediaChapterService].
 func (m *MediaChapterServiceImpl) CreateChapterImages(ctx context.Context, req *dto.CreateChapterImageReq) (*dto.ChapterImageRes, error) {
 	// 1. Find the MediaChapter first by find MediaUrl -> ChapterOrder
@@ -116,20 +131,6 @@ func (m *MediaChapterServiceImpl) CreateMediaChapters(ctx context.Context, req *
 	return nil, nil
 }
 
-// GetChapterImagesByChapterUrl implements [MediaChapterService].
-func (m *MediaChapterServiceImpl) GetChapterImagesByChapterUrl(ctx context.Context, url string) ([]dto.ChapterImageRes, error) {
-	images, err := m.repo.GetChapterImagesByChapterUrl(ctx, url)
-	if err != nil {
-		return nil, err
-	}
-
-	res := make([]dto.ChapterImageRes, len(images))
-	for i, img := range images {
-		res[i].SetData(img)
-	}
-
-	return res, nil
-}
 
 // GetMediaChaptersByMediaUrl implements [MediaChapterService].
 func (m *MediaChapterServiceImpl) GetMediaChaptersByMediaUrl(ctx context.Context, url string) ([]dto.MediaChapterRes, error) {

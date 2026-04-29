@@ -4,6 +4,10 @@ import (
 	"hta-platform/internal/media/domain/model/entity"
 )
 
+type GetChapterImagesReq struct {
+	MediaURL string `form:"media_url" binding:"required" validate:"required" dc:"Media URL"`
+}
+
 type Image struct {
 	Url         string `json:"url" binding:"required" validate:"required" dc:"URL ảnh"`
 	Description string `json:"description" binding:"omitempty" validate:"omitempty" dc:"Mô tả ảnh"`
@@ -55,11 +59,22 @@ func (r *MediaChapterRes) SetData(chapter entity.MediaChapter) {
 }
 
 type ChapterImageRes struct {
-	ID    string `json:"id"`
-	Order int64  `json:"order"`
+	ID     string  `json:"id"`
+	Order  int64   `json:"order"`
+	Images []Image `json:"images"`
 }
 
 func (r *ChapterImageRes) SetData(image entity.ChapterImage) {
 	r.ID = image.ID.String()
 	r.Order = image.Order
+	if len(image.Images) > 0 {
+		r.Images = make([]Image, len(image.Images))
+		for i, img := range image.Images {
+			r.Images[i] = Image{
+				Url:         img.URL,
+				Description: img.Description,
+				Source:      img.Source,
+			}
+		}
+	}
 }

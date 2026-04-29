@@ -15,16 +15,20 @@ type MediaChapterHandler struct {
 	service service.MediaChapterService
 }
 
+func (h *MediaChapterHandler) GetChapterImages(c *gin.Context) (interface{}, error) {
+	url := c.Param("chapter-url")
+	var req dto.GetChapterImagesReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		return nil, err
+	}
+
+	return h.service.GetChapterImages(c.Request.Context(), req.MediaURL, url)
+}
+
 func (h *MediaChapterHandler) GetMediaChaptersByMediaUrl(c *gin.Context) (interface{}, error) {
 	url := c.Param("media-url")
 
 	return h.service.GetMediaChaptersByMediaUrl(c, url)
-}
-
-func (h *MediaChapterHandler) GetChapterImagesByChapterUrl(c *gin.Context) (interface{}, error) {
-	url := c.Param("chapter-url")
-
-	return h.service.GetChapterImagesByChapterUrl(c, url)
 }
 
 func (h *MediaChapterHandler) CreateChapterImages(c *gin.Context) (interface{}, error) {

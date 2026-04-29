@@ -13,6 +13,25 @@ type mediaChapterRepository struct {
 	db *gorm.DB
 }
 
+// GetChapterImages implements [repository.MediaChapterRepository].
+func (m *mediaChapterRepository) GetChapterImages(ctx context.Context, mediaUrl string, chapterUrl string) ([]entity.ChapterImage, error) {
+	var chapter entity.MediaChapter
+	err := m.db.WithContext(ctx).
+		Joins("JOIN hta.media m ON m.id = hta.media_chapter.media_id").
+		Where("m.url = ? AND hta.media_chapter.url = ?", mediaUrl, chapterUrl).
+		Preload("Images", func(db *gorm.DB) *gorm.DB {
+			return db.Order("\"hta\".\"chapter_image\".\"order\" ASC")
+		}).
+		Preload("Images.Images").
+		First(&chapter).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return chapter.Images, nil
+}
+
 // FindChapterByMediaUrlAndOrder implements [repository.MediaChapterRepository].
 func (m *mediaChapterRepository) FindChapterByMediaUrlAndOrder(ctx context.Context, mediaUrl string, order int64) (*entity.MediaChapter, error) {
 	var chapter entity.MediaChapter
@@ -46,8 +65,8 @@ func (m *mediaChapterRepository) CreateChapterImages(ctx context.Context, images
 func (m *mediaChapterRepository) CreateMediaChapters(ctx context.Context, chapters []*entity.MediaChapter) ([]entity.MediaChapter, error) {
 	err := m.db.WithContext(ctx).
 		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "url"}},
-			DoUpdates: clause.AssignmentColumns([]string{"name", "order", "source", "language", "updated_at"}),
+			Columns:   []clause.Column{{Name: "media_id"}, {Name: "url"}, {Name: "order"}},
+			DoUpdates: clause.AssignmentColumns([]string{"name", "source", "language", "updated_at"}),
 		}).Create(&chapters).Error
 
 	if err != nil {
@@ -60,17 +79,6 @@ func (m *mediaChapterRepository) CreateMediaChapters(ctx context.Context, chapte
 	}
 
 	return res, nil
-}
-
-// GetChapterImagesByChapterUrl implements [repository.MediaChapterRepository].
-func (m *mediaChapterRepository) GetChapterImagesByChapterUrl(ctx context.Context, url string) ([]entity.ChapterImage, error) {
-	var images []entity.ChapterImage
-	err := m.db.WithContext(ctx).
-		Joins("JOIN hta.media_chapter mc ON mc.id = hta.chapter_image.chapter_id").
-		Where("mc.url = ?", url).
-		Order("hta.chapter_image.order ASC").
-		Find(&images).Error
-	return images, err
 }
 
 // GetMediaChaptersByMediaUrl implements [repository.MediaChapterRepository].
