@@ -1,9 +1,9 @@
 package initialize
 
 import (
+	"hta-platform/global"
 	authorHttp "hta-platform/internal/author/controller/http"
 	categoryHttp "hta-platform/internal/category/controller/http"
-	"hta-platform/global"
 	imageHttp "hta-platform/internal/image/controller/http"
 	initializeAuthor "hta-platform/internal/initialize/author"
 	initializeCategory "hta-platform/internal/initialize/category"
@@ -37,13 +37,13 @@ func InitRouter(db *gorm.DB) *gin.Engine {
 	}
 
 	// middlewares
-	r.Use(middleware.CORS) // cross
+	r.Use(middleware.CORS)
 	r.Use(middleware.ValidatorMiddleware())
 	// r.Use() // logging
 
 	// r.Use() // limiter global
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
-	// r.Use(middleware.Validator())      // middleware
+	// r.Use(middleware.Validator())
 
 	// r.Use(middlewares.NewRateLimiter().GlobalRateLimiter()) // 100 req/s
 	r.GET("/ping/100", func(ctx *gin.Context) {
