@@ -10,9 +10,11 @@ import (
 	initializeImage "hta-platform/internal/initialize/image"
 	initializeMedia "hta-platform/internal/initialize/media"
 	initializeMediaChapter "hta-platform/internal/initialize/media_chapter"
+	initializeUser "hta-platform/internal/initialize/user"
 	mediaChapterHttp "hta-platform/internal/media/controller/http"
 	mediaHttp "hta-platform/internal/media/controller/http"
 	"hta-platform/internal/middleware"
+	userHttp "hta-platform/internal/user/controller/http"
 	"hta-platform/pkg/response"
 
 	"github.com/gin-contrib/gzip"
@@ -73,6 +75,9 @@ func InitRouter(db *gorm.DB) *gin.Engine {
 
 	imageHandler := initializeImage.InitImage(db)
 	imageHttp.RegisterImageRoutes(v1, imageHandler)
+
+	userHandler := initializeUser.InitUser(db)
+	userHttp.RegisterUserRoutes(v1, userHandler)
 
 	return r
 }
