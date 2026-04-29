@@ -49,6 +49,9 @@ func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]ent
 	}
 
 	query = query.Where("is_nsfw = ?", r.IsNSFW)
+	if r.SysStatus != "" {
+		query = query.Where("sys_status = ?", r.SysStatus)
+	}
 
 	if len(r.Authors) > 0 {
 		query = query.Joins("JOIN hta.media_to_author ma ON ma.media_id = hta.media.id").

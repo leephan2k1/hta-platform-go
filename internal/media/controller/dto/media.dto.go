@@ -25,6 +25,7 @@ type MediaResponse struct {
 	IsNSFW      bool                      `json:"is_nsfw"`
 	Thumbnail   string                    `json:"thumbnail"`
 	Source      string                    `json:"source"`
+	SysStatus   string                    `json:"sys_status"`
 	Categories  []categoryDto.CategoryRes `json:"categories,omitempty"`
 	Authors     []authorDto.AuthorRes     `json:"authors,omitempty"`
 	OtherNames  []OtherNameRes            `json:"other_names,omitempty"`
@@ -43,6 +44,7 @@ func (r *MediaResponse) SetData(media entity.Media) {
 	r.IsNSFW = media.IsNSFW
 	r.Thumbnail = media.Thumbnail
 	r.Source = media.Source
+	r.SysStatus = media.SysStatus
 
 	if media.Status.ID != uuid.Nil {
 		r.Status = &StatusRes{}
@@ -135,6 +137,7 @@ type GetMediasReq struct {
 	Authors    []string `form:"authors"`
 	Categories []string `form:"categories"`
 	IsNSFW     bool     `form:"isNSFW"`
+	SysStatus  string   `form:"sysStatus"`
 	Limit      int      `form:"limit"`
 	Page       int      `form:"page"`
 }
