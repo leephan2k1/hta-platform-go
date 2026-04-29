@@ -57,9 +57,25 @@ func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]ent
 	}
 
 	if len(r.Categories) > 0 {
-		query = query.Joins("JOIN hta.media_to_category mc ON mc.media_id = hta.media.id").
-			Joins("JOIN hta.category c ON c.id = mc.category_id").
-			Where("c.slug IN ?", r.Categories)
+		var includeSlugs []string
+		var excludeSlugs []string
+		for _, cat := range r.Categories {
+			if strings.HasPrefix(cat, "!") {
+				excludeSlugs = append(excludeSlugs, strings.TrimPrefix(cat, "!"))
+			} else {
+				includeSlugs = append(includeSlugs, cat)
+			}
+		}
+
+		if len(includeSlugs) > 0 {
+			query = query.Joins("JOIN hta.media_to_category mc ON mc.media_id = hta.media.id").
+				Joins("JOIN hta.category c ON c.id = mc.category_id").
+				Where("c.slug IN ?", includeSlugs)
+		}
+
+		if len(excludeSlugs) > 0 {
+			query = query.Where("NOT EXISTS (SELECT 1 FROM hta.media_to_category mc_ex JOIN hta.category c_ex ON c_ex.id = mc_ex.category_id WHERE mc_ex.media_id = hta.media.id AND c_ex.slug IN ?)", excludeSlugs)
+		}
 	}
 
 	// 2. Count total before pagination
