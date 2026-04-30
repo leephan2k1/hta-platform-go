@@ -3,6 +3,8 @@ package initialize
 import (
 	"hta-platform/global"
 
+	"hta-platform/internal/middleware"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -16,6 +18,13 @@ func Run() (*gin.Engine, string) {
 	err := LoadConfig()
 	if err != nil {
 		logger.Fatal("Could not load config: %v", zap.Error(err))
+	}
+
+	// 2> Initialize Auth0 JWKS
+	if global.ConfigValue.Auth0Domain != "" {
+		if err := middleware.InitAuth0(); err != nil {
+			logger.Fatal("Could not initialize Auth0", zap.Error(err))
+		}
 	}
 
 	// 3> Initialize database connection

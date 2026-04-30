@@ -2,6 +2,10 @@ package dto
 
 import "strings"
 
+type UserToResourceReq struct {
+	ResourceID string `json:"resourceId" validate:"required,min=1"`
+}
+
 type RegisterUserReq struct {
 	Auth0Id    string `json:"auth0Id" validate:"required,min=1"`
 	Email      string `json:"email" validate:"required,min=1,email"`
