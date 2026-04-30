@@ -43,20 +43,49 @@ func (u *userRepository) BookmarkAuthor(ctx context.Context, userID string, auth
 
 // UnbookmarkAuthor implements [repository.UserRepository].
 func (u *userRepository) UnbookmarkAuthor(ctx context.Context, userID string, authorID string) error {
-	return u.db.WithContext(ctx).
+	return u.db.WithContext(ctx).Unscoped().
 		Where("user_id = ? AND author_id = ?", userID, authorID).
 		Delete(&entity.UserAuthor{}).Error
 }
 
 // GetBookmarkedAuthors implements [repository.UserRepository].
-func (u *userRepository) GetBookmarkedAuthors(ctx context.Context, userID string) ([]authorEntity.Author, error) {
+func (u *userRepository) GetBookmarkedAuthors(ctx context.Context, userID string) ([]repository.BookmarkedAuthor, error) {
 	var authors []authorEntity.Author
 	err := u.db.WithContext(ctx).
 		Table("hta.author").
 		Joins("JOIN hta.user_to_author ON hta.user_to_author.author_id = hta.author.id").
 		Where("hta.user_to_author.user_id = ? AND hta.user_to_author.deleted_at IS NULL", userID).
 		Find(&authors).Error
-	return authors, err
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]repository.BookmarkedAuthor, len(authors))
+	for i, a := range authors {
+		res[i].Author = a
+		// Get first media info
+		var media mediaEntity.Media
+		err := u.db.WithContext(ctx).
+			Table("hta.media").
+			Joins("JOIN hta.media_to_author ON hta.media_to_author.media_id = hta.media.id").
+			Where("hta.media_to_author.author_id = ? AND hta.media_to_author.deleted_at IS NULL", a.ID).
+			Order("hta.media.created_at DESC").
+			Preload("Images").
+			First(&media).Error
+		if err == nil {
+			res[i].FirstMedia = &media
+		}
+	}
+	return res, nil
+}
+
+// IsBookmarkedAuthor implements [repository.UserRepository].
+func (u *userRepository) IsBookmarkedAuthor(ctx context.Context, userID string, authorID string) (bool, error) {
+	var count int64
+	err := u.db.WithContext(ctx).Model(&entity.UserAuthor{}).
+		Where("user_id = ? AND author_id = ?", userID, authorID).
+		Count(&count).Error
+	return count > 0, err
 }
 
 // BookmarkMedia implements [repository.UserRepository].
@@ -74,7 +103,7 @@ func (u *userRepository) BookmarkMedia(ctx context.Context, userID string, media
 
 // UnbookmarkMedia implements [repository.UserRepository].
 func (u *userRepository) UnbookmarkMedia(ctx context.Context, userID string, mediaID string) error {
-	return u.db.WithContext(ctx).
+	return u.db.WithContext(ctx).Unscoped().
 		Where("user_id = ? AND media_id = ?", userID, mediaID).
 		Delete(&entity.UserMedia{}).Error
 }
@@ -94,6 +123,15 @@ func (u *userRepository) GetBookmarkedMedias(ctx context.Context, userID string)
 		}).
 		Find(&medias).Error
 	return medias, err
+}
+
+// IsBookmarkedMedia implements [repository.UserRepository].
+func (u *userRepository) IsBookmarkedMedia(ctx context.Context, userID string, mediaID string) (bool, error) {
+	var count int64
+	err := u.db.WithContext(ctx).Model(&entity.UserMedia{}).
+		Where("user_id = ? AND media_id = ?", userID, mediaID).
+		Count(&count).Error
+	return count > 0, err
 }
 
 func NewUserRepository(db *gorm.DB) repository.UserRepository {

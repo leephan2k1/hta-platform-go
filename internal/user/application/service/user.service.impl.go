@@ -52,10 +52,19 @@ func (u *userService) GetBookmarkedAuthors(ctx context.Context, userID string) (
 	}
 
 	res := make([]authorDto.AuthorRes, len(authors))
-	for i, author := range authors {
-		res[i].SetData(author)
+	for i, a := range authors {
+		res[i].SetData(a.Author)
+		if a.FirstMedia != nil {
+			res[i].FirstMedia = &authorDto.AuthorMediaRes{}
+			res[i].FirstMedia.SetData(*a.FirstMedia)
+		}
 	}
 	return res, nil
+}
+
+// IsBookmarkedAuthor implements [UserService].
+func (u *userService) IsBookmarkedAuthor(ctx context.Context, userID string, authorID string) (bool, error) {
+	return u.userRepo.IsBookmarkedAuthor(ctx, userID, authorID)
 }
 
 // BookmarkMedia implements [UserService].
@@ -80,6 +89,11 @@ func (u *userService) GetBookmarkedMedias(ctx context.Context, userID string) ([
 		res[i].SetData(media)
 	}
 	return res, nil
+}
+
+// IsBookmarkedMedia implements [UserService].
+func (u *userService) IsBookmarkedMedia(ctx context.Context, userID string, mediaID string) (bool, error) {
+	return u.userRepo.IsBookmarkedMedia(ctx, userID, mediaID)
 }
 
 func NewUserService(userRepo repository.UserRepository) UserService {

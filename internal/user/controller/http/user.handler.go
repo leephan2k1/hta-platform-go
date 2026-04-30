@@ -100,6 +100,26 @@ func (ah *UserHandler) GetBookmarkedMedias(ctx *gin.Context) (res interface{}, e
 	return ah.service.GetBookmarkedMedias(ctx, userID)
 }
 
+func (ah *UserHandler) IsBookmarkedAuthor(ctx *gin.Context) (res interface{}, err error) {
+	userID := ctx.GetString("user_id")
+	resourceID := ctx.Param("resourceId")
+	exist, err := ah.service.IsBookmarkedAuthor(ctx, userID, resourceID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"exist": exist}, nil
+}
+
+func (ah *UserHandler) IsBookmarkedMedia(ctx *gin.Context) (res interface{}, err error) {
+	userID := ctx.GetString("user_id")
+	resourceID := ctx.Param("resourceId")
+	exist, err := ah.service.IsBookmarkedMedia(ctx, userID, resourceID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"exist": exist}, nil
+}
+
 func NewUserHandler(service service.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
