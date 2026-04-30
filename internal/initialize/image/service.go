@@ -6,6 +6,7 @@ import (
 	"hta-platform/internal/image/controller/http"
 	persistence "hta-platform/internal/image/infrastructure/persistence/repository"
 	"hta-platform/internal/image/infrastructure/streamer"
+	mediaRepo "hta-platform/internal/media/infrastructure/persistence/repository"
 
 	"gorm.io/gorm"
 )
@@ -17,6 +18,7 @@ func InitImage(db *gorm.DB) *http.ImageHandler {
 	}
 
 	repo := persistence.NewImageRepository(db, streamers)
-	svc := service.NewImageService(repo)
+	mediaRepository := mediaRepo.NewMediaRepository(db)
+	svc := service.NewImageService(repo, mediaRepository)
 	return http.NewImageHandler(svc)
 }

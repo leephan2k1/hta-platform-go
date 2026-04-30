@@ -27,18 +27,32 @@ func (r *imageRepository) StreamImage(ctx context.Context, url string, source st
 }
 
 func (r *imageRepository) CreateImages(ctx context.Context, images []*entity.Image) ([]entity.Image, error) {
+	if len(images) == 0 {
+		return nil, nil
+	}
+
+	// De-duplicate images by URL to avoid "ON CONFLICT DO UPDATE command cannot affect row a second time"
+	uniqueImages := make([]*entity.Image, 0, len(images))
+	urlMap := make(map[string]struct{})
+	for i := len(images) - 1; i >= 0; i-- { // Process backwards to keep the latest one if duplicates exist
+		if _, exists := urlMap[images[i].URL]; !exists {
+			urlMap[images[i].URL] = struct{}{}
+			uniqueImages = append(uniqueImages, images[i])
+		}
+	}
+
 	err := r.db.WithContext(ctx).
 		Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "url"}},
 			DoUpdates: clause.AssignmentColumns([]string{"description", "resource_id", "source", "updated_at"}),
-		}).Create(&images).Error
+		}).Create(&uniqueImages).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]entity.Image, len(images))
-	for i, img := range images {
+	res := make([]entity.Image, len(uniqueImages))
+	for i, img := range uniqueImages {
 		res[i] = *img
 	}
 	return res, nil
