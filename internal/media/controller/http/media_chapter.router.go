@@ -1,6 +1,7 @@
 package http
 
 import (
+	"hta-platform/internal/middleware"
 	"hta-platform/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,9 @@ import (
 
 func RegisterMediaChapterRoutes(rg *gin.RouterGroup, handler *MediaChapterHandler) {
 	mc := rg.Group("/chapters")
+
+	mc.Use(middleware.Auth0Guard())
+	mc.Use(middleware.RolesGuard([]string{"MEMBER"}))
 
 	mc.GET("/by-media/:media-url", response.Wrap(handler.GetMediaChaptersByMediaUrl))
 

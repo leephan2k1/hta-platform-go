@@ -96,3 +96,59 @@ func containsAudience(aud interface{}, expected string) bool {
 	}
 	return false
 }
+
+// RolesGuard checks if the user has at least one of the required roles.
+func RolesGuard(allowedRoles []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claims, exists := c.Get("user")
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+			return
+		}
+
+		mapClaims, ok := claims.(jwt.MapClaims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "invalid claims"})
+			return
+		}
+
+		// Roles are usually stored in a custom claim in Auth0
+		rolesInterface, ok := mapClaims["https://hta.com/roles"]
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "insufficient permissions"})
+			return
+		}
+
+		var roles []string
+		switch v := rolesInterface.(type) {
+		case string:
+			roles = []string{v}
+		case []interface{}:
+			for _, r := range v {
+				if s, ok := r.(string); ok {
+					roles = append(roles, s)
+				}
+			}
+		}
+
+		hasRole := false
+		for _, role := range roles {
+			for _, allowed := range allowedRoles {
+				if role == allowed {
+					hasRole = true
+					break
+				}
+			}
+			if hasRole {
+				break
+			}
+		}
+
+		if !hasRole {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "insufficient permissions"})
+			return
+		}
+
+		c.Next()
+	}
+}
