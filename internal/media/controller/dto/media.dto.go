@@ -13,26 +13,28 @@ import (
 )
 
 type MediaResponse struct {
-	ID          string                    `json:"id"`
-	CreatedAt   time.Time                 `json:"created_at"`
-	UpdatedAt   time.Time                 `json:"updated_at"`
-	Name        string                    `json:"name"`
-	Description string                    `json:"description"`
-	URL         string                    `json:"url"`
-	StatusID    string                    `json:"status_id"`
-	Status      *StatusRes                `json:"status,omitempty"`
-	TypeID      string                    `json:"type_id"`
-	Type        *TypeRes                  `json:"type,omitempty"`
-	IsNSFW      bool                      `json:"is_nsfw"`
-	Thumbnail   string                    `json:"thumbnail"`
-	Source      string                    `json:"source"`
-	SysStatus   string                    `json:"sys_status"`
-	Categories  []categoryDto.CategoryRes `json:"categories,omitempty"`
-	Authors     []authorDto.AuthorRes     `json:"authors,omitempty"`
-	OtherNames  []OtherNameRes            `json:"other_names,omitempty"`
-	Chapters    []ChapterRes              `json:"chapters,omitempty"`
-	Images      []ImageRes                `json:"images,omitempty"`
-	Progress    float64                   `json:"progress"`
+	ID                   string                    `json:"id"`
+	CreatedAt            time.Time                 `json:"created_at"`
+	UpdatedAt            time.Time                 `json:"updated_at"`
+	Name                 string                    `json:"name"`
+	Description          string                    `json:"description"`
+	URL                  string                    `json:"url"`
+	StatusID             string                    `json:"status_id"`
+	Status               *StatusRes                `json:"status,omitempty"`
+	TypeID               string                    `json:"type_id"`
+	Type                 *TypeRes                  `json:"type,omitempty"`
+	IsNSFW               bool                      `json:"is_nsfw"`
+	Thumbnail            string                    `json:"thumbnail"`
+	Source               string                    `json:"source"`
+	SysStatus            string                    `json:"sys_status"`
+	Categories           []categoryDto.CategoryRes `json:"categories,omitempty"`
+	Authors              []authorDto.AuthorRes     `json:"authors,omitempty"`
+	OtherNames           []OtherNameRes            `json:"other_names,omitempty"`
+	Chapters             []ChapterRes              `json:"chapters,omitempty"`
+	Images               []ImageRes                `json:"images,omitempty"`
+	Progress             float64                   `json:"progress"`
+	ChapterProgress      string                    `json:"chapter_progress"`
+	ChapterImageProgress int                       `json:"chapter_image_progress"`
 }
 
 func (r *MediaResponse) SetData(media entity.Media) {

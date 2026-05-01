@@ -142,6 +142,8 @@ func (u *userService) GetReadingProgress(ctx context.Context, userID string) ([]
 		} else {
 			res[i].Progress = 0
 		}
+		res[i].ChapterProgress = p.ChapterURL
+		res[i].ChapterImageProgress = p.ChapterImageOrder
 	}
 	return res, nil
 }

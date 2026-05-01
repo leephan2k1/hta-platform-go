@@ -151,14 +151,15 @@ func (u *userRepository) GetReadingProgress(ctx context.Context, userID string) 
 	var progresses []struct {
 		MediaID              uuid.UUID
 		LastReadChapterOrder int64
+		ChapterURL           string
+		ChapterImageOrder    int
 	}
 
 	err := u.db.WithContext(ctx).
 		Table("hta.user_reading_progress p").
-		Select("p.media_id, MAX(c.order) as last_read_chapter_order").
+		Select("p.media_id, c.order as last_read_chapter_order, c.url as chapter_url, p.chapter_image_order").
 		Joins("JOIN hta.media_chapter c ON c.id = p.chapter_id").
 		Where("p.user_id = ? AND p.deleted_at IS NULL", userID).
-		Group("p.media_id").
 		Find(&progresses).Error
 	if err != nil {
 		return nil, err
@@ -180,6 +181,8 @@ func (u *userRepository) GetReadingProgress(ctx context.Context, userID string) 
 		if err == nil {
 			res[i].Media = media
 			res[i].LastReadChapterOrder = p.LastReadChapterOrder
+			res[i].ChapterURL = p.ChapterURL
+			res[i].ChapterImageOrder = p.ChapterImageOrder
 		}
 	}
 	return res, nil

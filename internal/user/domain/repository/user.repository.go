@@ -40,6 +40,8 @@ type UserReadingSessionSummary struct {
 type UserMediaProgress struct {
 	mediaEntity.Media
 	LastReadChapterOrder int64
+	ChapterURL           string
+	ChapterImageOrder    int
 }
 
 type BookmarkedAuthor struct {
