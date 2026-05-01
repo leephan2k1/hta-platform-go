@@ -7,6 +7,7 @@ import (
 	"hta-platform/internal/user/controller/dto"
 	"hta-platform/internal/user/domain/model/entity"
 	"hta-platform/internal/user/domain/repository"
+
 	"github.com/google/uuid"
 )
 
@@ -144,6 +145,8 @@ func (u *userService) GetReadingProgress(ctx context.Context, userID string) ([]
 		}
 		res[i].ChapterProgress = p.ChapterURL
 		res[i].ChapterImageProgress = p.ChapterImageOrder
+		res[i].CurrentChapter = p.LastReadChapterOrder
+		res[i].TotalChapter = int64(len(p.Media.Chapters)) + 1
 	}
 	return res, nil
 }

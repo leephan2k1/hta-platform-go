@@ -35,6 +35,8 @@ type MediaResponse struct {
 	Progress             float64                   `json:"progress"`
 	ChapterProgress      string                    `json:"chapter_progress"`
 	ChapterImageProgress int                       `json:"chapter_image_progress"`
+	CurrentChapter       int64                     `json:"current_chapter"`
+	TotalChapter         int64                     `json:"total_chapter"`
 }
 
 func (r *MediaResponse) SetData(media entity.Media) {
