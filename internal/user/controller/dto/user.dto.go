@@ -24,7 +24,7 @@ type UserReadingSessionEndReq struct {
 type UserReadingProgressReq struct {
 	ChapterID  string `json:"chapterId" validate:"required,min=1"`
 	MediaID    string `json:"mediaId" validate:"required,min=1"`
-	ImageOrder int    `json:"imageOrder" validate:"required"`
+	ImageOrder *int   `json:"imageOrder" validate:"required"`
 }
 
 type UserToResourceReq struct {

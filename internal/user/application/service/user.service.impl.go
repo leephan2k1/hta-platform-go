@@ -112,7 +112,7 @@ func (u *userService) UpsertReadingProgress(ctx context.Context, userID string, 
 		UserID:            userID,
 		ChapterID:         cID,
 		MediaID:           mID,
-		ChapterImageOrder: req.ImageOrder,
+		ChapterImageOrder: *req.ImageOrder,
 	}
 
 	return u.userRepo.UpsertReadingProgress(ctx, progress)
