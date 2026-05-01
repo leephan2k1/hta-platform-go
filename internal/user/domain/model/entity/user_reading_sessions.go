@@ -11,7 +11,6 @@ type UserReadingSession struct {
 	base.BaseModel
 
 	UserID    string    `gorm:"column:user_id;type:text;index" json:"user_id"`
-	ChapterID uuid.UUID `gorm:"column:chapter_id;type:uuid;index" json:"chapter_id"`
 	MediaID   uuid.UUID `gorm:"column:media_id;type:uuid;index" json:"media_id"`
 
 	StartedAt time.Time `gorm:"column:started_at;type:timestamp with time zone" json:"started_at"`
