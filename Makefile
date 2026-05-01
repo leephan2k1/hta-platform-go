@@ -14,6 +14,7 @@ export PATH := $(GOBIN):/usr/local/go/bin:$(PATH)
 
 BINARY_NAME=server-cli
 MAIN_RUN = ./cmd/server/main.go
+LAMBDA_MAIN = ./cmd/lambda/main.go
 SWAG=$(GOBIN)/swag
 AIR=$(GOBIN)/air
 DLV=$(GOBIN)/dlv
@@ -82,8 +83,18 @@ build-mac:
 # Build for all platforms
 build-all: build-linux build-windows build-mac
 
+# Build for AWS Lambda
+build-lambda:
+	@echo "Building for AWS Lambda..."
+	GOOS=linux GOARCH=amd64 $(GOCMD) build -ldflags="-s -w" -o bootstrap $(LAMBDA_MAIN)
+
+# Deploy to AWS Lambda
+deploy-lambda: build-lambda
+	@echo "Deploying to AWS Lambda..."
+	npx -y serverless@3 deploy
+
 # Install to GOPATH/bin
 install:
 	$(GOBUILD) -o $(GOPATH)/bin/$(BINARY_NAME) -v $(MAIN_RUN)
 
-.PHONY: all build clean build-linux build-windows build-mac build-all install start dev create up down status reset
+.PHONY: all build clean build-linux build-windows build-mac build-all install start dev create up down status reset build-lambda deploy-lambda
