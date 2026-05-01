@@ -19,4 +19,7 @@ type UserService interface {
 	UnbookmarkMedia(ctx context.Context, userID string, mediaID string) error
 	GetBookmarkedMedias(ctx context.Context, userID string) ([]mediaDto.MediaResponse, error)
 	IsBookmarkedMedia(ctx context.Context, userID string, mediaID string) (bool, error)
+
+	UpsertReadingProgress(ctx context.Context, userID string, req dto.UserReadingProgressReq) error
+	GetReadingProgress(ctx context.Context, userID string) ([]mediaDto.MediaResponse, error)
 }

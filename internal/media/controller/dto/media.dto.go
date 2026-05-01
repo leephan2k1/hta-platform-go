@@ -32,6 +32,7 @@ type MediaResponse struct {
 	OtherNames  []OtherNameRes            `json:"other_names,omitempty"`
 	Chapters    []ChapterRes              `json:"chapters,omitempty"`
 	Images      []ImageRes                `json:"images,omitempty"`
+	Progress    float64                   `json:"progress"`
 }
 
 func (r *MediaResponse) SetData(media entity.Media) {

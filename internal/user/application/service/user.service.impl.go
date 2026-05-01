@@ -7,6 +7,7 @@ import (
 	"hta-platform/internal/user/controller/dto"
 	"hta-platform/internal/user/domain/model/entity"
 	"hta-platform/internal/user/domain/repository"
+	"github.com/google/uuid"
 )
 
 type userService struct {
@@ -94,6 +95,55 @@ func (u *userService) GetBookmarkedMedias(ctx context.Context, userID string) ([
 // IsBookmarkedMedia implements [UserService].
 func (u *userService) IsBookmarkedMedia(ctx context.Context, userID string, mediaID string) (bool, error) {
 	return u.userRepo.IsBookmarkedMedia(ctx, userID, mediaID)
+}
+
+// UpsertReadingProgress implements [UserService].
+func (u *userService) UpsertReadingProgress(ctx context.Context, userID string, req dto.UserReadingProgressReq) error {
+	cID, err := uuid.Parse(req.ChapterID)
+	if err != nil {
+		return err
+	}
+	mID, err := uuid.Parse(req.MediaID)
+	if err != nil {
+		return err
+	}
+
+	progress := &entity.UserReadingProgress{
+		UserID:            userID,
+		ChapterID:         cID,
+		MediaID:           mID,
+		ChapterImageOrder: req.ImageOrder,
+	}
+
+	return u.userRepo.UpsertReadingProgress(ctx, progress)
+}
+
+// GetReadingProgress implements [UserService].
+func (u *userService) GetReadingProgress(ctx context.Context, userID string) ([]mediaDto.MediaResponse, error) {
+	progresses, err := u.userRepo.GetReadingProgress(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]mediaDto.MediaResponse, len(progresses))
+	for i, p := range progresses {
+		res[i].SetData(p.Media)
+
+		// Find max chapter order
+		var maxOrder int64
+		for _, ch := range p.Media.Chapters {
+			if ch.Order > maxOrder {
+				maxOrder = ch.Order
+			}
+		}
+
+		if maxOrder > 0 {
+			res[i].Progress = float64(p.LastReadChapterOrder) / float64(maxOrder)
+		} else {
+			res[i].Progress = 0
+		}
+	}
+	return res, nil
 }
 
 func NewUserService(userRepo repository.UserRepository) UserService {

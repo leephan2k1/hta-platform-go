@@ -24,4 +24,7 @@ func RegisterUserRoutes(rg *gin.RouterGroup, handler *UserHandler) {
 	privateUser.GET("/medias/:resourceId", response.Wrap(handler.IsBookmarkedMedia))
 	privateUser.POST("/medias", response.Wrap(handler.BookmarkMedia))
 	privateUser.DELETE("/medias", response.Wrap(handler.UnbookmarkMedia))
+
+	privateUser.GET("/reading/progress", response.Wrap(handler.GetReadingProgress))
+	privateUser.POST("/reading/progress", response.Wrap(handler.UpsertReadingProgress))
 }

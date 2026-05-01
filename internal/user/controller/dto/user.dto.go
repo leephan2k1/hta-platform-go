@@ -2,6 +2,12 @@ package dto
 
 import "strings"
 
+type UserReadingProgressReq struct {
+	ChapterID  string `json:"chapterId" validate:"required,min=1"`
+	MediaID    string `json:"mediaId" validate:"required,min=1"`
+	ImageOrder int    `json:"imageOrder" validate:"required"`
+}
+
 type UserToResourceReq struct {
 	ResourceID string `json:"resourceId" validate:"required,min=1"`
 }

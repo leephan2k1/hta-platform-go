@@ -134,6 +134,56 @@ func (u *userRepository) IsBookmarkedMedia(ctx context.Context, userID string, m
 	return count > 0, err
 }
 
+// UpsertReadingProgress implements [repository.UserRepository].
+func (u *userRepository) UpsertReadingProgress(ctx context.Context, progress *entity.UserReadingProgress) error {
+	return u.db.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "user_id"},
+			{Name: "media_id"},
+		},
+		DoUpdates: clause.AssignmentColumns([]string{"chapter_id", "chapter_image_order", "updated_at"}),
+	}).Create(progress).Error
+}
+
+// GetReadingProgress implements [repository.UserRepository].
+func (u *userRepository) GetReadingProgress(ctx context.Context, userID string) ([]repository.UserMediaProgress, error) {
+	var progresses []struct {
+		MediaID              uuid.UUID
+		LastReadChapterOrder int64
+	}
+
+	err := u.db.WithContext(ctx).
+		Table("hta.user_reading_progress p").
+		Select("p.media_id, MAX(c.order) as last_read_chapter_order").
+		Joins("JOIN hta.media_chapter c ON c.id = p.chapter_id").
+		Where("p.user_id = ? AND p.deleted_at IS NULL", userID).
+		Group("p.media_id").
+		Find(&progresses).Error
+	if err != nil {
+		return nil, err
+	}
+
+	if len(progresses) == 0 {
+		return nil, nil
+	}
+
+	res := make([]repository.UserMediaProgress, len(progresses))
+	for i, p := range progresses {
+		var media mediaEntity.Media
+		err := u.db.WithContext(ctx).
+			Preload("Authors").
+			Preload("Categories").
+			Preload("Chapters").
+			Preload("Images").
+			First(&media, "id = ?", p.MediaID).Error
+		if err == nil {
+			res[i].Media = media
+			res[i].LastReadChapterOrder = p.LastReadChapterOrder
+		}
+	}
+	return res, nil
+}
+
 func NewUserRepository(db *gorm.DB) repository.UserRepository {
 	return &userRepository{db}
 }

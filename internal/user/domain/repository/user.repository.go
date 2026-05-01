@@ -21,6 +21,14 @@ type UserRepository interface {
 	UnbookmarkMedia(ctx context.Context, userID string, mediaID string) error
 	GetBookmarkedMedias(ctx context.Context, userID string) ([]mediaEntity.Media, error)
 	IsBookmarkedMedia(ctx context.Context, userID string, mediaID string) (bool, error)
+
+	UpsertReadingProgress(ctx context.Context, progress *entity.UserReadingProgress) error
+	GetReadingProgress(ctx context.Context, userID string) ([]UserMediaProgress, error)
+}
+
+type UserMediaProgress struct {
+	mediaEntity.Media
+	LastReadChapterOrder int64
 }
 
 type BookmarkedAuthor struct {
