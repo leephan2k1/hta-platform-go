@@ -2,6 +2,25 @@ package dto
 
 import "strings"
 
+type UserReadingSessionRes struct {
+	MediaID     string `json:"mediaId"`
+	Duration    int64  `json:"duration"`
+	FirstReadAt string `json:"firstReadAt"`
+	LastReadAt  string `json:"lastReadAt"`
+}
+
+type UserReadingSessionStartRes struct {
+	SessionID string `json:"sessionId"`
+}
+
+type UserReadingSessionReq struct {
+	MediaID string `json:"mediaId" validate:"required,min=1"`
+}
+
+type UserReadingSessionEndReq struct {
+	SessionID string `json:"sessionId" validate:"required,min=1"`
+}
+
 type UserReadingProgressReq struct {
 	ChapterID  string `json:"chapterId" validate:"required,min=1"`
 	MediaID    string `json:"mediaId" validate:"required,min=1"`

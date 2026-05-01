@@ -6,6 +6,7 @@ import (
 	mediaEntity "hta-platform/internal/media/domain/model/entity"
 	"hta-platform/internal/user/domain/model/entity"
 	"hta-platform/internal/user/domain/repository"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -182,6 +183,36 @@ func (u *userRepository) GetReadingProgress(ctx context.Context, userID string) 
 		}
 	}
 	return res, nil
+}
+
+// StartReadingSession implements [repository.UserRepository].
+func (u *userRepository) StartReadingSession(ctx context.Context, session *entity.UserReadingSession) error {
+	session.StartedAt = time.Now()
+	return u.db.WithContext(ctx).Create(session).Error
+}
+
+// EndReadingSession implements [repository.UserRepository].
+func (u *userRepository) EndReadingSession(ctx context.Context, sessionID string) error {
+	var session entity.UserReadingSession
+	if err := u.db.WithContext(ctx).First(&session, "id = ?", sessionID).Error; err != nil {
+		return err
+	}
+	now := time.Now()
+	session.EndedAt = now
+	session.Duration = int64(now.Sub(session.StartedAt).Seconds())
+	return u.db.WithContext(ctx).Save(&session).Error
+}
+
+// GetReadingSessions implements [repository.UserRepository].
+func (u *userRepository) GetReadingSessions(ctx context.Context, userID string) ([]repository.UserReadingSessionSummary, error) {
+	var results []repository.UserReadingSessionSummary
+	err := u.db.WithContext(ctx).
+		Table("hta.user_reading_sessions").
+		Select("media_id, SUM(duration) as duration, TO_CHAR(MIN(started_at), 'YYYY-MM-DD') as first_read_at, TO_CHAR(MAX(started_at), 'YYYY-MM-DD') as last_read_at").
+		Where("user_id = ? AND deleted_at IS NULL", userID).
+		Group("media_id").
+		Scan(&results).Error
+	return results, err
 }
 
 func NewUserRepository(db *gorm.DB) repository.UserRepository {

@@ -146,6 +146,51 @@ func (u *userService) GetReadingProgress(ctx context.Context, userID string) ([]
 	return res, nil
 }
 
+// StartReadingSession implements [UserService].
+func (u *userService) StartReadingSession(ctx context.Context, userID string, req dto.UserReadingSessionReq) (*dto.UserReadingSessionStartRes, error) {
+	mID, err := uuid.Parse(req.MediaID)
+	if err != nil {
+		return nil, err
+	}
+
+	session := &entity.UserReadingSession{
+		UserID:  userID,
+		MediaID: mID,
+	}
+
+	if err := u.userRepo.StartReadingSession(ctx, session); err != nil {
+		return nil, err
+	}
+
+	return &dto.UserReadingSessionStartRes{
+		SessionID: session.ID.String(),
+	}, nil
+}
+
+// EndReadingSession implements [UserService].
+func (u *userService) EndReadingSession(ctx context.Context, userID string, req dto.UserReadingSessionEndReq) error {
+	return u.userRepo.EndReadingSession(ctx, req.SessionID)
+}
+
+// GetReadingSessions implements [UserService].
+func (u *userService) GetReadingSessions(ctx context.Context, userID string) (map[string]dto.UserReadingSessionRes, error) {
+	summaries, err := u.userRepo.GetReadingSessions(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make(map[string]dto.UserReadingSessionRes)
+	for _, s := range summaries {
+		res[s.MediaID] = dto.UserReadingSessionRes{
+			MediaID:     s.MediaID,
+			Duration:    s.Duration,
+			FirstReadAt: s.FirstReadAt,
+			LastReadAt:  s.LastReadAt,
+		}
+	}
+	return res, nil
+}
+
 func NewUserService(userRepo repository.UserRepository) UserService {
 	return &userService{userRepo: userRepo}
 }

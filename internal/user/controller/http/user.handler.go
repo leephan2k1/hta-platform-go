@@ -148,6 +148,54 @@ func (ah *UserHandler) GetReadingProgress(ctx *gin.Context) (res interface{}, er
 	return ah.service.GetReadingProgress(ctx, userID)
 }
 
+func (ah *UserHandler) StartReadingSession(ctx *gin.Context) (res interface{}, err error) {
+	userID := ctx.GetString("user_id")
+	var req dto.UserReadingSessionReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		return nil, err
+	}
+
+	validation, exists := ctx.Get("validation")
+	if !exists {
+		return nil, response.NewAPIError(http.StatusInternalServerError, "Invalid request", "Validation not found in context")
+	}
+
+	apiErr := utils.ValidateStruct(&req, validation.(*validator.Validate))
+	if apiErr != nil {
+		return nil, apiErr
+	}
+
+	return ah.service.StartReadingSession(ctx, userID, req)
+}
+
+func (ah *UserHandler) EndReadingSession(ctx *gin.Context) (res interface{}, err error) {
+	userID := ctx.GetString("user_id")
+	var req dto.UserReadingSessionEndReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		return nil, err
+	}
+
+	validation, exists := ctx.Get("validation")
+	if !exists {
+		return nil, response.NewAPIError(http.StatusInternalServerError, "Invalid request", "Validation not found in context")
+	}
+
+	apiErr := utils.ValidateStruct(&req, validation.(*validator.Validate))
+	if apiErr != nil {
+		return nil, apiErr
+	}
+
+	if err := ah.service.EndReadingSession(ctx, userID, req); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ah *UserHandler) GetReadingSessions(ctx *gin.Context) (res interface{}, err error) {
+	userID := ctx.GetString("user_id")
+	return ah.service.GetReadingSessions(ctx, userID)
+}
+
 func NewUserHandler(service service.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }

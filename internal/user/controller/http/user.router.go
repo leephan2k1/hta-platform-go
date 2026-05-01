@@ -27,4 +27,8 @@ func RegisterUserRoutes(rg *gin.RouterGroup, handler *UserHandler) {
 
 	privateUser.GET("/reading/progress", response.Wrap(handler.GetReadingProgress))
 	privateUser.POST("/reading/progress", response.Wrap(handler.UpsertReadingProgress))
+
+	privateUser.POST("/reading/session/start", response.Wrap(handler.StartReadingSession))
+	privateUser.POST("/reading/session/end", response.Wrap(handler.EndReadingSession))
+	privateUser.GET("/reading/session", response.Wrap(handler.GetReadingSessions))
 }

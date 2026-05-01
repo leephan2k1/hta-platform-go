@@ -24,6 +24,17 @@ type UserRepository interface {
 
 	UpsertReadingProgress(ctx context.Context, progress *entity.UserReadingProgress) error
 	GetReadingProgress(ctx context.Context, userID string) ([]UserMediaProgress, error)
+
+	StartReadingSession(ctx context.Context, session *entity.UserReadingSession) error
+	EndReadingSession(ctx context.Context, sessionID string) error
+	GetReadingSessions(ctx context.Context, userID string) ([]UserReadingSessionSummary, error)
+}
+
+type UserReadingSessionSummary struct {
+	MediaID     string
+	Duration    int64
+	FirstReadAt string
+	LastReadAt  string
 }
 
 type UserMediaProgress struct {

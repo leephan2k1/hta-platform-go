@@ -22,4 +22,8 @@ type UserService interface {
 
 	UpsertReadingProgress(ctx context.Context, userID string, req dto.UserReadingProgressReq) error
 	GetReadingProgress(ctx context.Context, userID string) ([]mediaDto.MediaResponse, error)
+
+	StartReadingSession(ctx context.Context, userID string, req dto.UserReadingSessionReq) (*dto.UserReadingSessionStartRes, error)
+	EndReadingSession(ctx context.Context, userID string, req dto.UserReadingSessionEndReq) error
+	GetReadingSessions(ctx context.Context, userID string) (map[string]dto.UserReadingSessionRes, error)
 }
