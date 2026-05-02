@@ -14,7 +14,7 @@ type Media struct {
 	Name        string                    `gorm:"column:name;unique;not null" json:"name"`
 	Description string                    `gorm:"column:description" json:"description"`
 	URL         string                    `gorm:"column:url;unique;not null" json:"url"`
-	StatusID    uuid.UUID                 `gorm:"column:status_id;type:uuid" json:"status_id"`
+	StatusID    *uuid.UUID                `gorm:"column:status_id;type:uuid" json:"status_id"`
 	Status      Status                    `gorm:"foreignKey:StatusID;references:ID" json:"status,omitempty"`
 	TypeID      uuid.UUID                 `gorm:"column:type_id;type:uuid" json:"type_id"`
 	Type        Type                      `gorm:"foreignKey:TypeID;references:ID" json:"type,omitempty"`

@@ -56,9 +56,13 @@ func (m *mediaService) CreateMedia(ctx context.Context, req *dto.CreateMediaReq)
 	slugVal := slug.Make(strings.ToLower(nameVal))
 
 	// Parse UUIDs from string
-	statusID, err := uuid.Parse(req.StatusID)
-	if err != nil {
-		return entity.Media{}, fmt.Errorf("invalid statusId: %w", err)
+	var statusID *uuid.UUID
+	if req.StatusID != "" {
+		parsed, err := uuid.Parse(req.StatusID)
+		if err != nil {
+			return entity.Media{}, fmt.Errorf("invalid statusId: %w", err)
+		}
+		statusID = &parsed
 	}
 	typeID, err := uuid.Parse(req.TypeID)
 	if err != nil {
@@ -77,6 +81,7 @@ func (m *mediaService) CreateMedia(ctx context.Context, req *dto.CreateMediaReq)
 			TypeID:      typeID,
 			IsNSFW:      req.IsNSFW,
 			Thumbnail:   req.Thumbnail,
+			Source:      req.Source,
 		}
 
 		// 2. Insert media (ON CONFLICT DO NOTHING on url)
@@ -144,9 +149,13 @@ func (m *mediaService) UpdateMedia(ctx context.Context, url string, req *dto.Cre
 	nameVal := strings.TrimSpace(req.Name)
 	slugVal := slug.Make(strings.ToLower(nameVal))
 
-	statusID, err := uuid.Parse(req.StatusID)
-	if err != nil {
-		return entity.Media{}, fmt.Errorf("invalid statusId: %w", err)
+	var statusID *uuid.UUID
+	if req.StatusID != "" {
+		parsed, err := uuid.Parse(req.StatusID)
+		if err != nil {
+			return entity.Media{}, fmt.Errorf("invalid statusId: %w", err)
+		}
+		statusID = &parsed
 	}
 	typeID, err := uuid.Parse(req.TypeID)
 	if err != nil {
