@@ -186,7 +186,7 @@ func (m *mediaRepository) AttachAuthors(tx *gorm.DB, mediaID uuid.UUID, authorID
 			AuthorID: authorID,
 		}
 	}
-	return tx.Create(&records).Error
+	return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&records).Error
 }
 
 // AttachCategories implements [repository.MediaRepository].
@@ -198,7 +198,7 @@ func (m *mediaRepository) AttachCategories(tx *gorm.DB, mediaID uuid.UUID, categ
 			CategoryID: categoryID,
 		}
 	}
-	return tx.Create(&records).Error
+	return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&records).Error
 }
 
 // DeleteAuthorsByMediaID implements [repository.MediaRepository].

@@ -6,9 +6,11 @@ import (
 	"hta-platform/pkg/response"
 	"hta-platform/utils"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/gosimple/slug"
 )
 
 type MediaHandler struct {
@@ -84,8 +86,6 @@ func (h *MediaHandler) CreateMedia(c *gin.Context) (interface{}, error) {
 }
 
 func (h *MediaHandler) UpdateMedia(c *gin.Context) (interface{}, error) {
-	url := c.Param("url")
-
 	var req dto.CreateMediaReq
 
 	err := c.ShouldBindJSON(&req)
@@ -104,6 +104,7 @@ func (h *MediaHandler) UpdateMedia(c *gin.Context) (interface{}, error) {
 		return nil, apiErr
 	}
 
+	url := slug.Make(strings.ToLower(req.Name))
 	updatedMedia, err := h.mediaService.UpdateMedia(c, url, &req)
 	if err != nil {
 		return nil, err
