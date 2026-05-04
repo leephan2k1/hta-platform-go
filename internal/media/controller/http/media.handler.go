@@ -104,7 +104,7 @@ func (h *MediaHandler) UpdateMedia(c *gin.Context) (interface{}, error) {
 		return nil, apiErr
 	}
 
-	url := slug.Make(strings.ToLower(req.Name))
+	url := slug.Make(strings.ToLower(*req.Name))
 	updatedMedia, err := h.mediaService.UpdateMedia(c, url, &req)
 	if err != nil {
 		return nil, err

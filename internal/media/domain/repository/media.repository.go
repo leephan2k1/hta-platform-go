@@ -19,7 +19,7 @@ type MediaRepository interface {
 
 	// UpdateMediaByURL updates a media record by its URL slug.
 	// Returns the updated media, or nil if no media was found with the given URL.
-	UpdateMediaByURL(tx *gorm.DB, url string, media *entity.Media) (*entity.Media, error)
+	UpdateMediaByURL(tx *gorm.DB, url string, updates map[string]interface{}) (*entity.Media, error)
 
 	// InsertOtherName inserts a MediaOtherName record.
 	InsertOtherName(tx *gorm.DB, otherName *entity.MediaOtherName) error

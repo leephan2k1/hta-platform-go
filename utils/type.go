@@ -18,3 +18,11 @@ func ParseUUIDs(ids []string) ([]uuid.UUID, error) {
 	}
 	return result, nil
 }
+
+// GetValueOrDefault returns the value of the pointer if not nil, otherwise returns the default value.
+func GetValueOrDefault[T any](ptr *T, defaultValue T) T {
+	if ptr == nil {
+		return defaultValue
+	}
+	return *ptr
+}

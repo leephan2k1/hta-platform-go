@@ -10,6 +10,7 @@ import (
 	mediaRepo "hta-platform/internal/media/domain/repository"
 	"io"
 	"sync"
+
 	"go.uber.org/zap"
 )
 
@@ -26,7 +27,7 @@ func (i *imageService) StreamImage(req *dto.StreamImageReq) (io.ReadCloser, erro
 // MigrateThumbnail implements [ImageService].
 func (i *imageService) MigrateThumbnail(ctx context.Context, req *dto.MigrateThumbnailReq) error {
 	const limit = 5000
-	global.Logger.Info("Starting thumbnail migration", zap.String("source", req.Source), zap.Int("limit", limit))
+	global.Logger.Info("Starting thumbnail migration", zap.Int("limit", limit))
 
 	// We need to handle both NSFW and non-NSFW media
 	for _, nsfw := range []bool{false, true} {
@@ -83,7 +84,7 @@ func (i *imageService) MigrateThumbnail(ctx context.Context, req *dto.MigrateThu
 							URL:         m.Thumbnail,
 							Description: req.Description,
 							ResourceID:  m.ID,
-							Source:      req.Source,
+							Source:      m.Source,
 						})
 					}
 				}

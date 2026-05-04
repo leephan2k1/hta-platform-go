@@ -182,19 +182,21 @@ func (r *GetMediasReq) Normalize() {
 }
 
 type CreateMediaReq struct {
-	Name              string   `json:"name" binding:"required" validate:"required,min=1" dc:"Tên media"`
-	Thumbnail         string   `json:"thumbnail" validate:"omitempty,url" dc:"Thumbnail"`
-	Description       string   `json:"description" validate:"omitempty" dc:"Mô tả"`
-	StatusID          string   `json:"statusId" validate:"omitempty,uuid" dc:"ID trạng thái"`
-	TypeID            string   `json:"typeId" binding:"required" validate:"required,uuid" dc:"ID loại"`
-	IsNSFW            bool     `json:"isNSFW" dc:"Gán nhãn NSFW"`
+	Name              *string  `json:"name" binding:"required" validate:"required,min=1" dc:"Tên media"`
+	Thumbnail         *string  `json:"thumbnail" validate:"omitempty,url" dc:"Thumbnail"`
+	Description       *string  `json:"description" validate:"omitempty" dc:"Mô tả"`
+	StatusID          *string  `json:"statusId" validate:"omitempty,uuid" dc:"ID trạng thái"`
+	TypeID            *string  `json:"typeId" binding:"required" validate:"required,uuid" dc:"ID loại"`
+	IsNSFW            *bool    `json:"isNSFW" dc:"Gán nhãn NSFW"`
 	AuthorIDs         []string `json:"authorIds" validate:"omitempty,dive,uuid" dc:"Danh sách ID tác giả"`
 	CategoryIDs       []string `json:"categoryIds" validate:"omitempty,dive,uuid" dc:"Danh sách ID danh mục"`
-	OtherName         string   `json:"otherName" validate:"omitempty" dc:"Tên khác"`
-	OtherNameLanguage string   `json:"otherNameLanguage" validate:"omitempty" dc:"Ngôn ngữ tên khác"`
-	Source            string   `json:"source" validate:"omitempty" dc:"Nguồn"`
+	OtherName         *string  `json:"otherName" validate:"omitempty" dc:"Tên khác"`
+	OtherNameLanguage *string  `json:"otherNameLanguage" validate:"omitempty" dc:"Ngôn ngữ tên khác"`
+	Source            *string  `json:"source" validate:"omitempty" dc:"Nguồn"`
 }
 
 func (r *CreateMediaReq) Normalize() {
-	r.Name = strings.TrimSpace(r.Name)
+	if r.Name != nil {
+		*r.Name = strings.TrimSpace(*r.Name)
+	}
 }

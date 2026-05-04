@@ -31,8 +31,9 @@ type CreateMediaChapterReq struct {
 }
 
 type CreateChapterReq struct {
-	Name  string `json:"name" binding:"required" validate:"required,min=1" dc:"Tên chapter"`
-	Order int64  `json:"order" binding:"required" validate:"required" dc:"Thứ tự chapter"`
+	Name   string `json:"name" binding:"required" validate:"required,min=1" dc:"Tên chapter"`
+	Order  int64  `json:"order" binding:"required" validate:"required" dc:"Thứ tự chapter"`
+	Source string `json:"source" binding:"required" validate:"required" dc:"Nguồn chapter"`
 }
 
 type MediaChapterRes struct {
