@@ -59,6 +59,9 @@ func InitRouter(db *gorm.DB) *gin.Engine {
 	// === register routes theo module
 	v1 := r.Group("/v1")
 
+	v1.Use(middleware.Auth0Guard())
+	v1.Use(middleware.RolesGuard([]string{"MEMBER"}))
+
 	// Register the auth routes
 	// === DI các handler
 	authorHandler := initializeAuthor.InitAuthor(db)

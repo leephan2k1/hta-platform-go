@@ -58,6 +58,29 @@ func (h *MediaHandler) GetMedias(c *gin.Context) (interface{}, error) {
 	return medias, nil
 }
 
+func (h *MediaHandler) GenerateSlug(c *gin.Context) (interface{}, error) {
+	var req dto.GenerateSlugReq
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		return nil, err
+	}
+	req.Normalize()
+
+	validation, exists := c.Get("validation")
+	if !exists {
+		return nil, response.NewAPIError(http.StatusInternalServerError, "Invalid request", "Validation not found in context")
+	}
+
+	apiErr := utils.ValidateStruct(&req, validation.(*validator.Validate))
+	if apiErr != nil {
+		return nil, apiErr
+	}
+
+	slugVal := slug.Make(strings.ToLower(*req.Name))
+	return slugVal, nil
+}
+
 func (h *MediaHandler) CreateMedia(c *gin.Context) (interface{}, error) {
 	var req dto.CreateMediaReq
 

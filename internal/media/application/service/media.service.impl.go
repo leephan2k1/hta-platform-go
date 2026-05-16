@@ -72,7 +72,7 @@ func (m *mediaService) CreateMedia(ctx context.Context, req *dto.CreateMediaReq)
 	var created *entity.Media
 
 	txErr := m.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-	// 1. Build Media entity
+		// 1. Build Media entity
 		media := &entity.Media{
 			Name:     nameVal,
 			URL:      slugVal,

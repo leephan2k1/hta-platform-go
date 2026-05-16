@@ -181,6 +181,16 @@ func (r *GetMediasReq) Normalize() {
 	r.Name = strings.TrimSpace(r.Name)
 }
 
+type GenerateSlugReq struct {
+	Name *string `json:"name" binding:"required" validate:"required,min=1" dc:"Tên media"`
+}
+
+func (r *GenerateSlugReq) Normalize() {
+	if r.Name != nil {
+		*r.Name = strings.TrimSpace(*r.Name)
+	}
+}
+
 type CreateMediaReq struct {
 	Name              *string  `json:"name" binding:"required" validate:"required,min=1" dc:"Tên media"`
 	Thumbnail         *string  `json:"thumbnail" validate:"omitempty,url" dc:"Thumbnail"`
