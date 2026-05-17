@@ -137,6 +137,7 @@ type ChapterRes struct {
 	URL      string `json:"url"`
 	Language string `json:"language"`
 	Order    int64  `json:"order"`
+	Source   string `json:"source"`
 }
 
 func (r *ChapterRes) SetData(chapter entity.MediaChapter) {
@@ -145,6 +146,7 @@ func (r *ChapterRes) SetData(chapter entity.MediaChapter) {
 	r.URL = chapter.URL
 	r.Language = chapter.Language
 	r.Order = chapter.Order
+	r.Source = chapter.Source
 }
 
 type ImageRes struct {
