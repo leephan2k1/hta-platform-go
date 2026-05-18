@@ -49,7 +49,7 @@ func (m *mediaChapterRepository) FindChapterByMediaUrlAndOrder(ctx context.Conte
 
 // CreateChapterImages implements [repository.MediaChapterRepository].
 func (m *mediaChapterRepository) CreateChapterImages(ctx context.Context, images []*entity.ChapterImage) ([]entity.ChapterImage, error) {
-	err := m.db.WithContext(ctx).Create(&images).Error
+	err := m.db.WithContext(ctx).CreateInBatches(&images, 500).Error
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (m *mediaChapterRepository) CreateMediaChapters(ctx context.Context, chapte
 		Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "media_id"}, {Name: "url"}, {Name: "order"}},
 			DoUpdates: clause.AssignmentColumns([]string{"name", "source", "language", "updated_at"}),
-		}).Create(&chapters).Error
+		}).CreateInBatches(&chapters, 500).Error
 
 	if err != nil {
 		return nil, err

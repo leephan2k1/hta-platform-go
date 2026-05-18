@@ -11,9 +11,11 @@ type Config struct {
 	DBHost     string `mapstructure:"DB_HOST"`
 	DBPort     string `mapstructure:"DB_PORT"`
 	DBName     string `mapstructure:"DB_NAME"`
-	ServerPort string `mapstructure:"SERVER_PORT"`
-	LogLevel   string `mapstructure:"LOG_LEVEL"`
-	MMReferer  string `mapstructure:"MM_REFERER"`
+	ServerPort    string `mapstructure:"SERVER_PORT"`
+	LogLevel      string `mapstructure:"LOG_LEVEL"`
+	MMReferer     string `mapstructure:"MM_REFERER"`
+	Auth0Domain   string `mapstructure:"AUTH0_DOMAIN"`
+	Auth0Audience string `mapstructure:"AUTH0_AUDIENCE"`
 }
 
 var (

@@ -6,9 +6,11 @@ import (
 	"hta-platform/pkg/response"
 	"hta-platform/utils"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/gosimple/slug"
 )
 
 type MediaHandler struct {
@@ -56,6 +58,29 @@ func (h *MediaHandler) GetMedias(c *gin.Context) (interface{}, error) {
 	return medias, nil
 }
 
+func (h *MediaHandler) GenerateSlug(c *gin.Context) (interface{}, error) {
+	var req dto.GenerateSlugReq
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		return nil, err
+	}
+	req.Normalize()
+
+	validation, exists := c.Get("validation")
+	if !exists {
+		return nil, response.NewAPIError(http.StatusInternalServerError, "Invalid request", "Validation not found in context")
+	}
+
+	apiErr := utils.ValidateStruct(&req, validation.(*validator.Validate))
+	if apiErr != nil {
+		return nil, apiErr
+	}
+
+	slugVal := slug.Make(strings.ToLower(*req.Name))
+	return slugVal, nil
+}
+
 func (h *MediaHandler) CreateMedia(c *gin.Context) (interface{}, error) {
 	var req dto.CreateMediaReq
 
@@ -84,8 +109,6 @@ func (h *MediaHandler) CreateMedia(c *gin.Context) (interface{}, error) {
 }
 
 func (h *MediaHandler) UpdateMedia(c *gin.Context) (interface{}, error) {
-	url := c.Param("url")
-
 	var req dto.CreateMediaReq
 
 	err := c.ShouldBindJSON(&req)
@@ -104,6 +127,7 @@ func (h *MediaHandler) UpdateMedia(c *gin.Context) (interface{}, error) {
 		return nil, apiErr
 	}
 
+	url := slug.Make(strings.ToLower(*req.Name))
 	updatedMedia, err := h.mediaService.UpdateMedia(c, url, &req)
 	if err != nil {
 		return nil, err

@@ -1,18 +1,20 @@
 package initialize
 
 import (
+	"hta-platform/global"
 	authorHttp "hta-platform/internal/author/controller/http"
 	categoryHttp "hta-platform/internal/category/controller/http"
-	"hta-platform/global"
 	imageHttp "hta-platform/internal/image/controller/http"
 	initializeAuthor "hta-platform/internal/initialize/author"
 	initializeCategory "hta-platform/internal/initialize/category"
 	initializeImage "hta-platform/internal/initialize/image"
 	initializeMedia "hta-platform/internal/initialize/media"
 	initializeMediaChapter "hta-platform/internal/initialize/media_chapter"
+	initializeUser "hta-platform/internal/initialize/user"
 	mediaChapterHttp "hta-platform/internal/media/controller/http"
 	mediaHttp "hta-platform/internal/media/controller/http"
 	"hta-platform/internal/middleware"
+	userHttp "hta-platform/internal/user/controller/http"
 	"hta-platform/pkg/response"
 
 	"github.com/gin-contrib/gzip"
@@ -37,13 +39,13 @@ func InitRouter(db *gorm.DB) *gin.Engine {
 	}
 
 	// middlewares
-	r.Use(middleware.CORS) // cross
+	r.Use(middleware.CORS)
 	r.Use(middleware.ValidatorMiddleware())
 	// r.Use() // logging
 
 	// r.Use() // limiter global
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
-	// r.Use(middleware.Validator())      // middleware
+	// r.Use(middleware.Validator())
 
 	// r.Use(middlewares.NewRateLimiter().GlobalRateLimiter()) // 100 req/s
 	r.GET("/ping/100", func(ctx *gin.Context) {
@@ -56,6 +58,9 @@ func InitRouter(db *gorm.DB) *gin.Engine {
 
 	// === register routes theo module
 	v1 := r.Group("/v1")
+
+	v1.Use(middleware.Auth0Guard())
+	v1.Use(middleware.RolesGuard([]string{"MEMBER"}))
 
 	// Register the auth routes
 	// === DI các handler
@@ -73,6 +78,9 @@ func InitRouter(db *gorm.DB) *gin.Engine {
 
 	imageHandler := initializeImage.InitImage(db)
 	imageHttp.RegisterImageRoutes(v1, imageHandler)
+
+	userHandler := initializeUser.InitUser(db)
+	userHttp.RegisterUserRoutes(v1, userHandler)
 
 	return r
 }

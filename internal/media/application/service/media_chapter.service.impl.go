@@ -113,6 +113,7 @@ func (m *MediaChapterServiceImpl) CreateMediaChapters(ctx context.Context, req *
 			MediaID: media.ID,
 			Name:    ch.Name,
 			Order:   ch.Order,
+			Source:  ch.Source,
 			URL:     chapterSlug,
 		}
 	}
@@ -130,7 +131,6 @@ func (m *MediaChapterServiceImpl) CreateMediaChapters(ctx context.Context, req *
 
 	return nil, nil
 }
-
 
 // GetMediaChaptersByMediaUrl implements [MediaChapterService].
 func (m *MediaChapterServiceImpl) GetMediaChaptersByMediaUrl(ctx context.Context, url string) ([]dto.MediaChapterRes, error) {

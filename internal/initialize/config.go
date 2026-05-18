@@ -3,6 +3,7 @@ package initialize
 import (
 	"fmt"
 	"hta-platform/global"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -14,13 +15,25 @@ func LoadConfig() (err error) {
 
 	viper.AutomaticEnv()
 
+	// List of keys to bind for Unmarshal to work without a physical .env file
+	keys := []string{
+		"DB_USER", "DB_PASSWORD", "DB_HOST", "DB_PORT", "DB_NAME",
+		"SERVER_PORT", "LOG_LEVEL", "MM_REFERER", "AUTH0_DOMAIN", "AUTH0_AUDIENCE",
+	}
+	for _, key := range keys {
+		viper.BindEnv(key)
+	}
+
 	err = viper.ReadInConfig()
 	if err != nil {
-		// If the config file is not found, return a specific error
+		// If the config file is not found, we ignore it and rely on Environment Variables
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			return fmt.Errorf("config file not found: %w", err)
+			fmt.Println("No .env file found, relying on environment variables")
+		} else if _, ok := err.(*os.PathError); ok {
+			fmt.Println("No .env file found, relying on environment variables")
+		} else {
+			return fmt.Errorf("error reading config file: %w", err)
 		}
-		return fmt.Errorf("error reading config file: %w", err)
 	}
 
 	var config global.Config

@@ -13,25 +13,30 @@ import (
 )
 
 type MediaResponse struct {
-	ID          string                    `json:"id"`
-	CreatedAt   time.Time                 `json:"created_at"`
-	UpdatedAt   time.Time                 `json:"updated_at"`
-	Name        string                    `json:"name"`
-	Description string                    `json:"description"`
-	URL         string                    `json:"url"`
-	StatusID    string                    `json:"status_id"`
-	Status      *StatusRes                `json:"status,omitempty"`
-	TypeID      string                    `json:"type_id"`
-	Type        *TypeRes                  `json:"type,omitempty"`
-	IsNSFW      bool                      `json:"is_nsfw"`
-	Thumbnail   string                    `json:"thumbnail"`
-	Source      string                    `json:"source"`
-	SysStatus   string                    `json:"sys_status"`
-	Categories  []categoryDto.CategoryRes `json:"categories,omitempty"`
-	Authors     []authorDto.AuthorRes     `json:"authors,omitempty"`
-	OtherNames  []OtherNameRes            `json:"other_names,omitempty"`
-	Chapters    []ChapterRes              `json:"chapters,omitempty"`
-	Images      []ImageRes                `json:"images,omitempty"`
+	ID                   string                    `json:"id"`
+	CreatedAt            time.Time                 `json:"created_at"`
+	UpdatedAt            time.Time                 `json:"updated_at"`
+	Name                 string                    `json:"name"`
+	Description          string                    `json:"description"`
+	URL                  string                    `json:"url"`
+	StatusID             string                    `json:"status_id"`
+	Status               *StatusRes                `json:"status,omitempty"`
+	TypeID               string                    `json:"type_id"`
+	Type                 *TypeRes                  `json:"type,omitempty"`
+	IsNSFW               bool                      `json:"is_nsfw"`
+	Thumbnail            string                    `json:"thumbnail"`
+	Source               string                    `json:"source"`
+	SysStatus            string                    `json:"sys_status"`
+	Categories           []categoryDto.CategoryRes `json:"categories,omitempty"`
+	Authors              []authorDto.AuthorRes     `json:"authors,omitempty"`
+	OtherNames           []OtherNameRes            `json:"other_names,omitempty"`
+	Chapters             []ChapterRes              `json:"chapters,omitempty"`
+	Images               []ImageRes                `json:"images,omitempty"`
+	Progress             float64                   `json:"progress"`
+	ChapterProgress      string                    `json:"chapter_progress"`
+	ChapterImageProgress int                       `json:"chapter_image_progress"`
+	CurrentChapter       int64                     `json:"current_chapter"`
+	TotalChapter         int64                     `json:"total_chapter"`
 }
 
 func (r *MediaResponse) SetData(media entity.Media) {
@@ -41,7 +46,9 @@ func (r *MediaResponse) SetData(media entity.Media) {
 	r.Name = media.Name
 	r.Description = media.Description
 	r.URL = media.URL
-	r.StatusID = media.StatusID.String()
+	if media.StatusID != nil {
+		r.StatusID = media.StatusID.String()
+	}
 	r.TypeID = media.TypeID.String()
 	r.IsNSFW = media.IsNSFW
 	r.Thumbnail = media.Thumbnail
@@ -130,6 +137,7 @@ type ChapterRes struct {
 	URL      string `json:"url"`
 	Language string `json:"language"`
 	Order    int64  `json:"order"`
+	Source   string `json:"source"`
 }
 
 func (r *ChapterRes) SetData(chapter entity.MediaChapter) {
@@ -138,6 +146,7 @@ func (r *ChapterRes) SetData(chapter entity.MediaChapter) {
 	r.URL = chapter.URL
 	r.Language = chapter.Language
 	r.Order = chapter.Order
+	r.Source = chapter.Source
 }
 
 type ImageRes struct {
@@ -174,19 +183,32 @@ func (r *GetMediasReq) Normalize() {
 	r.Name = strings.TrimSpace(r.Name)
 }
 
+type GenerateSlugReq struct {
+	Name *string `json:"name" binding:"required" validate:"required,min=1" dc:"Tên media"`
+}
+
+func (r *GenerateSlugReq) Normalize() {
+	if r.Name != nil {
+		*r.Name = strings.TrimSpace(*r.Name)
+	}
+}
+
 type CreateMediaReq struct {
-	Name              string   `json:"name" binding:"required" validate:"required,min=1" dc:"Tên media"`
-	Thumbnail         string   `json:"thumbnail" validate:"omitempty,url" dc:"Thumbnail"`
-	Description       string   `json:"description" validate:"omitempty" dc:"Mô tả"`
-	StatusID          string   `json:"statusId" binding:"required" validate:"required,uuid" dc:"ID trạng thái"`
-	TypeID            string   `json:"typeId" binding:"required" validate:"required,uuid" dc:"ID loại"`
-	IsNSFW            bool     `json:"isNSFW" dc:"Gán nhãn NSFW"`
+	Name              *string  `json:"name" binding:"required" validate:"required,min=1" dc:"Tên media"`
+	Thumbnail         *string  `json:"thumbnail" validate:"omitempty,url" dc:"Thumbnail"`
+	Description       *string  `json:"description" validate:"omitempty" dc:"Mô tả"`
+	StatusID          *string  `json:"statusId" validate:"omitempty,uuid" dc:"ID trạng thái"`
+	TypeID            *string  `json:"typeId" binding:"required" validate:"required,uuid" dc:"ID loại"`
+	IsNSFW            *bool    `json:"isNSFW" dc:"Gán nhãn NSFW"`
 	AuthorIDs         []string `json:"authorIds" validate:"omitempty,dive,uuid" dc:"Danh sách ID tác giả"`
 	CategoryIDs       []string `json:"categoryIds" validate:"omitempty,dive,uuid" dc:"Danh sách ID danh mục"`
-	OtherName         string   `json:"otherName" validate:"omitempty" dc:"Tên khác"`
-	OtherNameLanguage string   `json:"otherNameLanguage" validate:"omitempty" dc:"Ngôn ngữ tên khác"`
+	OtherName         *string  `json:"otherName" validate:"omitempty" dc:"Tên khác"`
+	OtherNameLanguage *string  `json:"otherNameLanguage" validate:"omitempty" dc:"Ngôn ngữ tên khác"`
+	Source            *string  `json:"source" validate:"omitempty" dc:"Nguồn"`
 }
 
 func (r *CreateMediaReq) Normalize() {
-	r.Name = strings.TrimSpace(r.Name)
+	if r.Name != nil {
+		*r.Name = strings.TrimSpace(*r.Name)
+	}
 }

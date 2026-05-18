@@ -52,15 +52,19 @@ func (m *mediaService) GetMedias(ctx context.Context, req *dto.GetMediasReq) (dt
 
 // CreateMedia implements [MediaService].
 func (m *mediaService) CreateMedia(ctx context.Context, req *dto.CreateMediaReq) (entity.Media, error) {
-	nameVal := strings.TrimSpace(req.Name)
+	nameVal := strings.TrimSpace(*req.Name)
 	slugVal := slug.Make(strings.ToLower(nameVal))
 
 	// Parse UUIDs from string
-	statusID, err := uuid.Parse(req.StatusID)
-	if err != nil {
-		return entity.Media{}, fmt.Errorf("invalid statusId: %w", err)
+	var statusID *uuid.UUID
+	if req.StatusID != nil && *req.StatusID != "" {
+		parsed, err := uuid.Parse(*req.StatusID)
+		if err != nil {
+			return entity.Media{}, fmt.Errorf("invalid statusId: %w", err)
+		}
+		statusID = &parsed
 	}
-	typeID, err := uuid.Parse(req.TypeID)
+	typeID, err := uuid.Parse(*req.TypeID)
 	if err != nil {
 		return entity.Media{}, fmt.Errorf("invalid typeId: %w", err)
 	}
@@ -70,13 +74,23 @@ func (m *mediaService) CreateMedia(ctx context.Context, req *dto.CreateMediaReq)
 	txErr := m.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 1. Build Media entity
 		media := &entity.Media{
-			Name:        nameVal,
-			Description: req.Description,
-			URL:         slugVal,
-			StatusID:    statusID,
-			TypeID:      typeID,
-			IsNSFW:      req.IsNSFW,
-			Thumbnail:   req.Thumbnail,
+			Name:     nameVal,
+			URL:      slugVal,
+			StatusID: statusID,
+			TypeID:   typeID,
+		}
+
+		if req.Description != nil {
+			media.Description = *req.Description
+		}
+		if req.IsNSFW != nil {
+			media.IsNSFW = *req.IsNSFW
+		}
+		if req.Thumbnail != nil {
+			media.Thumbnail = *req.Thumbnail
+		}
+		if req.Source != nil {
+			media.Source = *req.Source
 		}
 
 		// 2. Insert media (ON CONFLICT DO NOTHING on url)
@@ -90,10 +104,10 @@ func (m *mediaService) CreateMedia(ctx context.Context, req *dto.CreateMediaReq)
 		}
 
 		// 3. Other Name
-		if req.OtherName != "" {
+		if req.OtherName != nil && *req.OtherName != "" {
 			otherName := &entity.MediaOtherName{
-				Name:     req.OtherName,
-				Language: req.OtherNameLanguage,
+				Name:     *req.OtherName,
+				Language: utils.GetValueOrDefault(req.OtherNameLanguage, ""),
 				MediaID:  insertedMedia.ID,
 			}
 			if err := m.mediaRepo.InsertOtherName(tx, otherName); err != nil {
@@ -141,45 +155,68 @@ func (m *mediaService) CreateMedia(ctx context.Context, req *dto.CreateMediaReq)
 // UpdateMedia implements [MediaService].
 // Follows the TS pattern: update by URL, then replace M2M relations.
 func (m *mediaService) UpdateMedia(ctx context.Context, url string, req *dto.CreateMediaReq) (entity.Media, error) {
-	nameVal := strings.TrimSpace(req.Name)
-	slugVal := slug.Make(strings.ToLower(nameVal))
+	updates := make(map[string]interface{})
 
-	statusID, err := uuid.Parse(req.StatusID)
-	if err != nil {
-		return entity.Media{}, fmt.Errorf("invalid statusId: %w", err)
+	if req.Name != nil {
+		nameVal := strings.TrimSpace(*req.Name)
+		updates["name"] = nameVal
+		updates["url"] = slug.Make(strings.ToLower(nameVal))
 	}
-	typeID, err := uuid.Parse(req.TypeID)
-	if err != nil {
-		return entity.Media{}, fmt.Errorf("invalid typeId: %w", err)
+
+	if req.Description != nil {
+		updates["description"] = *req.Description
+	}
+
+	if req.StatusID != nil {
+		if *req.StatusID == "" {
+			updates["status_id"] = nil
+		} else {
+			parsed, err := uuid.Parse(*req.StatusID)
+			if err != nil {
+				return entity.Media{}, fmt.Errorf("invalid statusId: %w", err)
+			}
+			updates["status_id"] = &parsed
+		}
+	}
+
+	if req.TypeID != nil {
+		parsed, err := uuid.Parse(*req.TypeID)
+		if err != nil {
+			return entity.Media{}, fmt.Errorf("invalid typeId: %w", err)
+		}
+		updates["type_id"] = parsed
+	}
+
+	if req.IsNSFW != nil {
+		updates["is_nsfw"] = *req.IsNSFW
+	}
+
+	if req.Thumbnail != nil {
+		updates["thumbnail"] = *req.Thumbnail
+	}
+
+	if req.Source != nil {
+		updates["source"] = *req.Source
 	}
 
 	var updated *entity.Media
 
 	txErr := m.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 1. Update media by URL
-		media := &entity.Media{
-			Name:        nameVal,
-			Description: req.Description,
-			URL:         slugVal,
-			StatusID:    statusID,
-			TypeID:      typeID,
-			IsNSFW:      req.IsNSFW,
-			Thumbnail:   req.Thumbnail,
-		}
-
-		updatedMedia, err := m.mediaRepo.UpdateMediaByURL(tx, url, media)
+		updatedMedia, err := m.mediaRepo.UpdateMediaByURL(tx, url, updates)
 		if err != nil {
 			return err
 		}
 
 		// 2. Replace other names
-		if err := m.mediaRepo.DeleteOtherNamesByMediaID(tx, updatedMedia.ID); err != nil {
-			return err
-		}
-		if req.OtherName != "" {
+		if req.OtherName != nil && *req.OtherName != "" {
+			if err := m.mediaRepo.DeleteOtherNamesByMediaID(tx, updatedMedia.ID); err != nil {
+				return err
+			}
+
 			otherName := &entity.MediaOtherName{
-				Name:     req.OtherName,
-				Language: req.OtherNameLanguage,
+				Name:     *req.OtherName,
+				Language: utils.GetValueOrDefault(req.OtherNameLanguage, ""),
 				MediaID:  updatedMedia.ID,
 			}
 			if err := m.mediaRepo.InsertOtherName(tx, otherName); err != nil {
@@ -188,10 +225,11 @@ func (m *mediaService) UpdateMedia(ctx context.Context, url string, req *dto.Cre
 		}
 
 		// 3. Replace authors
-		if err := m.mediaRepo.DeleteAuthorsByMediaID(tx, updatedMedia.ID); err != nil {
-			return err
-		}
 		if len(req.AuthorIDs) > 0 {
+			if err := m.mediaRepo.DeleteAuthorsByMediaID(tx, updatedMedia.ID); err != nil {
+				return err
+			}
+
 			authorUUIDs, err := utils.ParseUUIDs(req.AuthorIDs)
 			if err != nil {
 				return fmt.Errorf("invalid authorIds: %w", err)
@@ -202,10 +240,11 @@ func (m *mediaService) UpdateMedia(ctx context.Context, url string, req *dto.Cre
 		}
 
 		// 4. Replace categories
-		if err := m.mediaRepo.DeleteCategoriesByMediaID(tx, updatedMedia.ID); err != nil {
-			return err
-		}
 		if len(req.CategoryIDs) > 0 {
+			if err := m.mediaRepo.DeleteCategoriesByMediaID(tx, updatedMedia.ID); err != nil {
+				return err
+			}
+
 			categoryUUIDs, err := utils.ParseUUIDs(req.CategoryIDs)
 			if err != nil {
 				return fmt.Errorf("invalid categoryIds: %w", err)

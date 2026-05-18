@@ -15,5 +15,7 @@ func RegisterMediaRoutes(rg *gin.RouterGroup, handler *MediaHandler) {
 
 	m.POST("", response.Wrap(handler.CreateMedia))
 
+	m.POST("/generate-slug", response.Wrap(handler.GenerateSlug))
+
 	m.PATCH("/:url", response.Wrap(handler.UpdateMedia))
 }

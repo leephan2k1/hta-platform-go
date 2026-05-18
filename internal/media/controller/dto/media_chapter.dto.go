@@ -31,8 +31,9 @@ type CreateMediaChapterReq struct {
 }
 
 type CreateChapterReq struct {
-	Name  string `json:"name" binding:"required" validate:"required,min=1" dc:"Tên chapter"`
-	Order int64  `json:"order" binding:"required" validate:"required" dc:"Thứ tự chapter"`
+	Name   string `json:"name" binding:"required" validate:"required,min=1" dc:"Tên chapter"`
+	Order  int64  `json:"order" binding:"required" validate:"required" dc:"Thứ tự chapter"`
+	Source string `json:"source" binding:"required" validate:"required" dc:"Nguồn chapter"`
 }
 
 type MediaChapterRes struct {
@@ -41,6 +42,7 @@ type MediaChapterRes struct {
 	URL      string            `json:"url"`
 	Language string            `json:"language"`
 	Order    int64             `json:"order"`
+	Source   string            `json:"source"`
 	Images   []ChapterImageRes `json:"images,omitempty"`
 }
 
@@ -50,6 +52,7 @@ func (r *MediaChapterRes) SetData(chapter entity.MediaChapter) {
 	r.URL = chapter.URL
 	r.Language = chapter.Language
 	r.Order = chapter.Order
+	r.Source = chapter.Source
 	if len(chapter.Images) > 0 {
 		r.Images = make([]ChapterImageRes, len(chapter.Images))
 		for i, img := range chapter.Images {

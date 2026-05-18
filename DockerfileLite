@@ -1,0 +1,45 @@
+# ---- Stage 1: Build ----
+FROM golang:1.26-alpine AS builder
+
+# Install certificates and timezone data (needed for the scratch image later)
+RUN apk add --no-cache ca-certificates tzdata
+
+# Create a non-root user to copy into the scratch image
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Cache dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source
+COPY . .
+
+# Build a fully static binary
+# -ldflags="-s -w" removes debug symbols to reduce size further
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -o /app/server ./cmd/server
+
+# ---- Stage 2: Runtime (Ultra Lite) ----
+FROM scratch
+
+# Copy SSL certificates for HTTPS requests (e.g. Auth0)
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+# Copy timezone data
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+# Copy user info to run as non-root
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+
+WORKDIR /app
+
+# Copy the static binary
+COPY --from=builder /app/server .
+
+# Use the non-root user
+USER appuser
+
+EXPOSE 8800
+
+ENTRYPOINT ["./server"]

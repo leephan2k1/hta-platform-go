@@ -1,5 +1,9 @@
 package dto
 
+type MigrateThumbnailReq struct {
+	Description string `form:"description" binding:"required" validate:"required" dc:"Mô tả"`
+}
+
 type StreamImageReq struct {
 	Source string `form:"source" binding:"required" validate:"required" dc:"Nguồn"`
 

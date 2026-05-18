@@ -127,21 +127,16 @@ func (m *mediaRepository) GetMedias(ctx context.Context, req interface{}) ([]ent
 	return items, total, nil
 }
 
-// CreateMedia implements [repository.MediaRepository].
-// Uses ON CONFLICT DO NOTHING on the url column. Returns false if the row was a duplicate.
+// CreateMedia inserts a new media record. If a conflict occurs on the 'url' column, it updates the existing record.
+// Returns the created/updated media and a boolean (currently always true if successful).
 func (m *mediaRepository) CreateMedia(tx *gorm.DB, media *entity.Media) (*entity.Media, bool, error) {
 	result := tx.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "url"}},
-		DoNothing: true,
-	}).Create(media)
+		Columns:   []clause.Column{{Name: "name"}},
+		UpdateAll: true,
+	}).CreateInBatches(media, 500)
 
 	if result.Error != nil {
 		return nil, false, result.Error
-	}
-
-	// RowsAffected == 0 means ON CONFLICT DO NOTHING triggered (duplicate slug/url)
-	if result.RowsAffected == 0 {
-		return nil, false, nil
 	}
 
 	return media, true, nil
@@ -149,27 +144,19 @@ func (m *mediaRepository) CreateMedia(tx *gorm.DB, media *entity.Media) (*entity
 
 // UpdateMediaByURL implements [repository.MediaRepository].
 // Updates media fields WHERE url = ? and returns the updated record.
-func (m *mediaRepository) UpdateMediaByURL(tx *gorm.DB, url string, media *entity.Media) (*entity.Media, error) {
-	// Find the existing media by URL first
-	var existing entity.Media
-	if err := tx.Where("url = ?", url).First(&existing).Error; err != nil {
+func (m *mediaRepository) UpdateMediaByURL(tx *gorm.DB, url string, updates map[string]interface{}) (*entity.Media, error) {
+	var media entity.Media
+	// Find the existing media by URL first to ensure it exists and get its ID
+	if err := tx.Where("url = ?", url).First(&media).Error; err != nil {
 		return nil, err
 	}
 
-	// Update the fields on the existing record
-	existing.Name = media.Name
-	existing.Description = media.Description
-	existing.URL = media.URL
-	existing.StatusID = media.StatusID
-	existing.TypeID = media.TypeID
-	existing.IsNSFW = media.IsNSFW
-	existing.Thumbnail = media.Thumbnail
-
-	if err := tx.Save(&existing).Error; err != nil {
+	// Update the fields using the map
+	if err := tx.Model(&media).Updates(updates).Error; err != nil {
 		return nil, err
 	}
 
-	return &existing, nil
+	return &media, nil
 }
 
 // InsertOtherName implements [repository.MediaRepository].
@@ -186,7 +173,7 @@ func (m *mediaRepository) AttachAuthors(tx *gorm.DB, mediaID uuid.UUID, authorID
 			AuthorID: authorID,
 		}
 	}
-	return tx.Create(&records).Error
+	return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&records).Error
 }
 
 // AttachCategories implements [repository.MediaRepository].
@@ -198,7 +185,7 @@ func (m *mediaRepository) AttachCategories(tx *gorm.DB, mediaID uuid.UUID, categ
 			CategoryID: categoryID,
 		}
 	}
-	return tx.Create(&records).Error
+	return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&records).Error
 }
 
 // DeleteAuthorsByMediaID implements [repository.MediaRepository].
